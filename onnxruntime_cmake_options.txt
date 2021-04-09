@@ -1,0 +1,4 @@
+--parallel
+--use_openmp
+--skip_tests
+--build_shared_lib
