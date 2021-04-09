@@ -27,7 +27,7 @@ function collectLibs() {
 function cmakeParamsMac() {
   ./build.sh --config $1 \
     $(cat ./onnxruntime_cmake_options.txt) \
-    --cmake_extra_defines CMAKE_INSTALL_PREFIX=./install \
+    --cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF \
     OpenMP_C_FLAGS="-Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include" \
     OpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include" \
     OpenMP_CXX_LIB_NAMES="omp" \
@@ -42,7 +42,7 @@ function cmakeParamsMac() {
 function cmakeParamsLinux() {
   ./build.sh --config $1 \
     $(cat ./onnxruntime_cmake_options.txt) \
-    --cmake_extra_defines CMAKE_INSTALL_PREFIX=./install
+    --cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF
 
   pushd build/Linux/Release
   collectLibs

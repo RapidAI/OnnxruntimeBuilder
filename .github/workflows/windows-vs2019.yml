@@ -1,30 +1,20 @@
-name: linux
+name: windows-vs2019
 
 on:
   workflow_dispatch:
 
 jobs:
-  ubuntu1604:
-    runs-on: ubuntu-16.04
-
-    strategy:
-      matrix:
-        python-version: [ 3.8.5 ]
+  windows-vs2019:
+    runs-on: windows-2019
 
     env:
       ONNX_VERSION: v1.7.0
-      SHARED_PKG_NAME: onnxruntime-1.7.0-ubuntu1604-shared
-      STATIC_PKG_NAME: onnxruntime-1.7.0-ubuntu1604-static
+      SHARED_PKG_NAME: onnxruntime-1.7.0-vs2019-shared
+      STATIC_PKG_NAME: onnxruntime-1.7.0-vs2019-static
 
     steps:
       # 检出代码
       - uses: actions/checkout@v2
-
-      # 配置Python环境 onnxruntime要求python minor version: expecting python 3.6+
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
 
       # 检出onnxruntime
       - name: checkout onnxruntime
@@ -38,24 +28,28 @@ jobs:
       # 复制编译脚本
       - name: copy build script
         run: |
-          cp build-onnxruntime.sh onnxruntime-${{ env.ONNX_VERSION }}
+          cp build-onnxruntime-vs2019.bat onnxruntime-${{ env.ONNX_VERSION }}
           cp onnxruntime_cmake_options.txt onnxruntime-${{ env.ONNX_VERSION }}
 
       # 编译
       - name: build
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
-          chmod a+x build-onnxruntime.sh &&./build-onnxruntime.sh
+          ./build-onnxruntime-vs2019.bat
 
-      # install文件夹改名linux，并使用7z压缩
+      # install文件夹改名，并使用7z压缩
       - name: 7zip
         run: |
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build/Linux/Release/install linux
-          7z a ${{ env.SHARED_PKG_NAME }}.7z linux
-          rm -r -f linux
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build/Linux/Release/install-static linux
-          7z a ${{ env.STATIC_PKG_NAME }}.7z linux
-          rm -r -f linux
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64/Release/install windows-x64
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x86/Release/install windows-x86
+          7z a ${{ env.SHARED_PKG_NAME }}.7z windows-x64 windows-x86
+          rm -r -Force windows-x64
+          rm -r -Force windows-x86
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64/Release/install-static windows-x64
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x86/Release/install-static windows-x86
+          7z a ${{ env.STATIC_PKG_NAME }}.7z windows-x64 windows-x86
+          rm -r -Force windows-x64
+          rm -r -Force windows-x86
 
       # 上传artifact
       - name: upload
@@ -64,6 +58,7 @@ jobs:
           name: ${{ env.SHARED_PKG_NAME }}
           path: ${{ env.SHARED_PKG_NAME }}.7z
 
+      # 上传artifact
       - name: upload
         uses: actions/upload-artifact@v2
         with:
