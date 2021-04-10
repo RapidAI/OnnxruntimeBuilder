@@ -42,11 +42,15 @@ jobs:
         run: |
           mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64/Release/install windows-x64
           mv onnxruntime-${{ env.ONNX_VERSION }}/build-x86/Release/install windows-x86
+          copy cmake/shared/OnnxRuntimeConfig.cmake windows-x64
+          copy cmake/shared/OnnxRuntimeConfig.cmake windows-x86
           7z a ${{ env.SHARED_PKG_NAME }}.7z windows-x64 windows-x86
           rm -r -Force windows-x64
           rm -r -Force windows-x86
           mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64/Release/install-static windows-x64
           mv onnxruntime-${{ env.ONNX_VERSION }}/build-x86/Release/install-static windows-x86
+          copy cmake/static/windows/OnnxRuntimeConfig.cmake windows-x64
+          copy cmake/static/windows/OnnxRuntimeConfig.cmake windows-x86
           7z a ${{ env.STATIC_PKG_NAME }}.7z windows-x64 windows-x86
           rm -r -Force windows-x64
           rm -r -Force windows-x86
