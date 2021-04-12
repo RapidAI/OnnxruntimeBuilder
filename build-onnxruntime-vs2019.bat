@@ -1,4 +1,4 @@
-:: build opencv 4.5.x for windows by benjaminwan
+:: build onnxruntime for windows by benjaminwan
 @ECHO OFF
 chcp 65001
 cls
@@ -8,7 +8,6 @@ for /f "Delims=" %%x in (onnxruntime_cmake_options.txt) do set OPTIONS=!OPTIONS!
 
 call :cmakeParamsX64 "Visual Studio 16 2019"
 call :cmakeParamsX86 "Visual Studio 16 2019"
-::call :cmakeParamsX64 "Visual Studio 15 2017"
 GOTO:EOF
 
 :collectLibs
