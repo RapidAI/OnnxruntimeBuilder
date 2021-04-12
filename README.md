@@ -12,5 +12,18 @@ Onnxruntime Builder
 
 包内添加了简单的cmake，用于cmake系统find_package.
 
-### windows版本说明
+仓库的Release的包不支持GPU，仅使用CPU。
+
+### windows版本说特别说明
 虽然v1.6.0支持vs2017，但是因为v1.7.0在vs2017下编译出错，所以windows环境下就仅保留了vs2019版本。
+
+### 关于OpenMP
+[官方v1.7.0版本说明](https://github.com/microsoft/onnxruntime/releases/tag/v1.7.0)
+
+Starting from this release, all ONNX Runtime CPU packages are now built without OpenMP.
+
+从1.7.0开始，官方Release的所有CPU版的包编译时没有启用OpenMP选项。
+
+但是本仓库的编译脚本仍然启用了OpenMP选项，即使用本仓库的包时，编译环境要求安装OpenMP。
+
+这是与官方Release不同的地方，敬请注意!
