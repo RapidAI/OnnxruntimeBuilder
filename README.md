@@ -14,7 +14,7 @@ Onnxruntime Builder
 
 仓库的Release的包不支持GPU，仅使用CPU。
 
-### windows版本说特别说明
+### windows版本特别说明
 虽然v1.6.0支持vs2017，但是因为v1.7.0在vs2017下编译出错，所以windows环境下就仅保留了vs2019版本。
 
 ### 关于OpenMP
