@@ -16,9 +16,9 @@ jobs:
         python-version: [ 3.8.5 ]
 
     env:
-      ONNX_VERSION: v1.7.0
-      SHARED_PKG_NAME: onnxruntime-1.7.0-ubuntu1604-shared
-      STATIC_PKG_NAME: onnxruntime-1.7.0-ubuntu1604-static
+      ONNX_VERSION: v1.8.0
+      SHARED_PKG_NAME: onnxruntime-1.8.0-ubuntu1604-shared
+      STATIC_PKG_NAME: onnxruntime-1.8.0-ubuntu1604-static
 
     steps:
       # 检出代码
@@ -80,9 +80,9 @@ jobs:
     runs-on: macos-10.15
 
     env:
-      ONNX_VERSION: v1.7.0
-      SHARED_PKG_NAME: onnxruntime-1.7.0-macos1015-shared
-      STATIC_PKG_NAME: onnxruntime-1.7.0-macos1015-static
+      ONNX_VERSION: v1.8.0
+      SHARED_PKG_NAME: onnxruntime-1.8.0-macos1015-shared
+      STATIC_PKG_NAME: onnxruntime-1.8.0-macos1015-static
 
     steps:
       # 检出代码
@@ -143,9 +143,9 @@ jobs:
     runs-on: windows-2019
 
     env:
-      ONNX_VERSION: v1.7.0
-      SHARED_PKG_NAME: onnxruntime-1.7.0-vs2019-shared
-      STATIC_PKG_NAME: onnxruntime-1.7.0-vs2019-static
+      ONNX_VERSION: v1.8.0
+      SHARED_PKG_NAME: onnxruntime-1.8.0-vs2019-shared
+      STATIC_PKG_NAME: onnxruntime-1.8.0-vs2019-static
 
     steps:
       # 检出代码
@@ -262,7 +262,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.7.0-ubuntu1604-shared
+          PKG_NAME: onnxruntime-1.8.0-ubuntu1604-shared
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -273,7 +273,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.7.0-ubuntu1604-static
+          PKG_NAME: onnxruntime-1.8.0-ubuntu1604-static
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -284,7 +284,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.7.0-macos1015-shared
+          PKG_NAME: onnxruntime-1.8.0-macos1015-shared
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -295,7 +295,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.7.0-macos1015-static
+          PKG_NAME: onnxruntime-1.8.0-macos1015-static
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -306,7 +306,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.7.0-vs2019-shared
+          PKG_NAME: onnxruntime-1.8.0-vs2019-shared
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -317,7 +317,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.7.0-vs2019-static
+          PKG_NAME: onnxruntime-1.8.0-vs2019-static
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
