@@ -8,9 +8,9 @@ jobs:
     runs-on: windows-2019
 
     env:
-      ONNX_VERSION: v1.8.0
-      SHARED_PKG_NAME: onnxruntime-1.8.0-vs2019-shared
-      STATIC_PKG_NAME: onnxruntime-1.8.0-vs2019-static
+      ONNX_VERSION: v1.8.1
+      SHARED_PKG_NAME: onnxruntime-1.8.1-vs2019-shared
+      STATIC_PKG_NAME: onnxruntime-1.8.1-vs2019-static
 
     steps:
       # 检出代码
