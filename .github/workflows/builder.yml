@@ -8,8 +8,8 @@ on:
 
 jobs:
 
-  ubuntu1604:
-    runs-on: ubuntu-16.04
+  ubuntu1804:
+    runs-on: ubuntu-18.04
 
     strategy:
       matrix:
@@ -17,8 +17,8 @@ jobs:
 
     env:
       ONNX_VERSION: v1.9.0
-      SHARED_PKG_NAME: onnxruntime-1.8.1-ubuntu1604-shared
-      STATIC_PKG_NAME: onnxruntime-1.8.1-ubuntu1604-static
+      SHARED_PKG_NAME: onnxruntime-1.8.1-ubuntu1804-shared
+      STATIC_PKG_NAME: onnxruntime-1.8.1-ubuntu1804-static
 
     steps:
       # 检出代码
@@ -205,7 +205,7 @@ jobs:
           path: ${{ env.STATIC_PKG_NAME }}.7z
 
   release:
-    needs: [ ubuntu1604, macos1015, windows-vs2019 ]
+    needs: [ ubuntu1804, macos1015, windows-vs2019 ]
 
     runs-on: ubuntu-latest
 
@@ -258,22 +258,22 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: upload-ubuntu1604-shared
+      - name: upload-ubuntu1804-shared
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.8.1-ubuntu1604-shared
+          PKG_NAME: onnxruntime-1.8.1-ubuntu1804-shared
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
           asset_name: ${{ env.PKG_NAME }}.7z
           asset_content_type: application/x-7z-compressed
 
-      - name: upload-ubuntu1604-static
+      - name: upload-ubuntu1804-static
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.8.1-ubuntu1604-static
+          PKG_NAME: onnxruntime-1.8.1-ubuntu1804-static
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
