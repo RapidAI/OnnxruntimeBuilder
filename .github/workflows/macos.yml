@@ -8,7 +8,7 @@ jobs:
     runs-on: macos-10.15
 
     env:
-      ONNX_VERSION: v1.8.1
+      ONNX_VERSION: v1.9.0
       SHARED_PKG_NAME: onnxruntime-1.8.1-macos1015-shared
       STATIC_PKG_NAME: onnxruntime-1.8.1-macos1015-static
 

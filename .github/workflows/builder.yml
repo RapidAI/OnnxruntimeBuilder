@@ -16,7 +16,7 @@ jobs:
         python-version: [ 3.8.5 ]
 
     env:
-      ONNX_VERSION: v1.8.1
+      ONNX_VERSION: v1.9.0
       SHARED_PKG_NAME: onnxruntime-1.8.1-ubuntu1604-shared
       STATIC_PKG_NAME: onnxruntime-1.8.1-ubuntu1604-static
 
@@ -80,7 +80,7 @@ jobs:
     runs-on: macos-10.15
 
     env:
-      ONNX_VERSION: v1.8.1
+      ONNX_VERSION: v1.9.0
       SHARED_PKG_NAME: onnxruntime-1.8.1-macos1015-shared
       STATIC_PKG_NAME: onnxruntime-1.8.1-macos1015-static
 
@@ -143,7 +143,7 @@ jobs:
     runs-on: windows-2019
 
     env:
-      ONNX_VERSION: v1.8.1
+      ONNX_VERSION: v1.9.0
       SHARED_PKG_NAME: onnxruntime-1.8.1-vs2019-shared
       STATIC_PKG_NAME: onnxruntime-1.8.1-vs2019-static
 
