@@ -27,3 +27,6 @@ Starting from this release, all ONNX Runtime CPU packages are now built without 
 但是本仓库的编译脚本仍然启用了OpenMP选项，即使用本仓库的包时，编译环境要求安装OpenMP。
 
 这是与官方Release不同的地方，敬请注意!
+
+#### 20211011
+从1.9.0开始，移除OpenMP编译选项，保持与官方一致
