@@ -13,22 +13,24 @@ GOTO:EOF
 :collectLibs
 cmake --build . --config Release --target install
 del /s/q install\*test*.exe
-mkdir -p install-static\lib
+mkdir install-static\lib
 xcopy install\include install-static\include /s /y /i
-copy RELEASE\ONNXRUNTIME_SESSION.LIB install-static\lib
-copy RELEASE\ONNXRUNTIME_OPTIMIZER.LIB install-static\lib
-copy RELEASE\ONNXRUNTIME_PROVIDERS.LIB install-static\lib
-copy RELEASE\ONNXRUNTIME_UTIL.LIB install-static\lib
-copy RELEASE\ONNXRUNTIME_FRAMEWORK.LIB install-static\lib
-copy RELEASE\ONNXRUNTIME_GRAPH.LIB install-static\lib
-copy RELEASE\ONNXRUNTIME_COMMON.LIB install-static\lib
-copy RELEASE\ONNXRUNTIME_MLAS.LIB install-static\lib
-copy RELEASE\ONNXRUNTIME_FLATBUFFERS.LIB install-static\lib
-copy EXTERNAL\ONNX\RELEASE\ONNX.LIB install-static\lib
-copy EXTERNAL\ONNX\RELEASE\ONNX_PROTO.LIB install-static\lib
-copy "EXTERNAL\PROTOBUF\CMAKE\RELEASE\LIBPROTOBUF-LITE.LIB" install-static\lib
-copy EXTERNAL\RE2\RELEASE\RE2.LIB install-static\lib
-copy EXTERNAL\FLATBUFFERS\RELEASE\FLATBUFFERS.LIB install-static\lib
+copy Release\onnxruntime_session.lib install-static\lib
+copy Release\onnxruntime_optimizer.lib install-static\lib
+copy Release\onnxruntime_providers.lib install-static\lib
+copy Release\onnxruntime_util.lib install-static\lib
+copy Release\onnxruntime_framework.lib install-static\lib
+copy Release\onnxruntime_graph.lib install-static\lib
+copy Release\onnxruntime_common.lib install-static\lib
+copy Release\onnxruntime_mlas.lib install-static\lib
+copy Release\onnxruntime_flatbuffers.lib install-static\lib
+copy external\onnx\Release\onnx.lib install-static\lib
+copy external\onnx\Release\onnx_proto.lib install-static\lib
+copy external\protobuf\cmake\Release\libprotobuf-lite.lib install-static\lib
+copy external\re2\Release\re2.lib install-static\lib
+copy external\flatbuffers\Release\flatbuffers.lib install-static\lib
+copy external\pytorch_cpuinfo\Release\cpuinfo.lib install-static\lib
+copy external\pytorch_cpuinfo\deps\clog\Release\clog.lib install-static\lib
 GOTO:EOF
 
 :cmakeParamsX64

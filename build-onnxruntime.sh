@@ -21,6 +21,8 @@ function collectLibs() {
   cp external/protobuf/cmake/libprotobuf-lite.a install-static/lib
   cp external/re2/libre2.a install-static/lib
   cp external/flatbuffers/libflatbuffers.a install-static/lib
+  cp external/pytorch_cpuinfo/libcpuinfo.a install-static/lib
+  cp external/pytorch_cpuinfo/deps/clog/libclog.a install-static/lib
   cp external/nsync/libnsync_cpp.a install-static/lib
 }
 
