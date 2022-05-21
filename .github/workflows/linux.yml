@@ -12,9 +12,9 @@ jobs:
         python-version: [ 3.8.5 ]
 
     env:
-      ONNX_VERSION: v1.9.0
-      SHARED_PKG_NAME: onnxruntime-1.9.0-ubuntu1804-shared
-      STATIC_PKG_NAME: onnxruntime-1.9.0-ubuntu1804-static
+      ONNX_VERSION: v1.9.1
+      SHARED_PKG_NAME: onnxruntime-1.9.1-ubuntu1804-shared
+      STATIC_PKG_NAME: onnxruntime-1.9.1-ubuntu1804-static
 
     steps:
       # 检出代码
