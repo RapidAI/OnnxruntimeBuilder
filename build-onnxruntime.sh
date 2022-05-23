@@ -1,5 +1,5 @@
 #!/bin/bash
-# build onnxruntime 1.7 by benjaminwan
+# build onnxruntime 1.10 by benjaminwan
 # CMakeFiles/onnxruntime.dir/link.txt/link/lib*.a
 
 function collectLibs() {
@@ -13,8 +13,8 @@ function collectLibs() {
   cp libonnxruntime_util.a install-static/lib
   cp libonnxruntime_framework.a install-static/lib
   cp libonnxruntime_graph.a install-static/lib
-  cp libonnxruntime_common.a install-static/lib
   cp libonnxruntime_mlas.a install-static/lib
+  cp libonnxruntime_common.a install-static/lib
   cp libonnxruntime_flatbuffers.a install-static/lib
   cp external/onnx/libonnx.a install-static/lib
   cp external/onnx/libonnx_proto.a install-static/lib

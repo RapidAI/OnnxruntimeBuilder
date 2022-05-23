@@ -8,9 +8,9 @@ jobs:
     runs-on: macos-10.15
 
     env:
-      ONNX_VERSION: v1.9.1
-      SHARED_PKG_NAME: onnxruntime-1.9.1-macos1015-shared
-      STATIC_PKG_NAME: onnxruntime-1.9.1-macos1015-static
+      ONNX_VERSION: v1.10.0
+      SHARED_PKG_NAME: onnxruntime-1.10.0-macos1015-shared
+      STATIC_PKG_NAME: onnxruntime-1.10.0-macos1015-static
 
     steps:
       # 检出代码
