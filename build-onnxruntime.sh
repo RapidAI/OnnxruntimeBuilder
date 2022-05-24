@@ -1,29 +1,36 @@
 #!/bin/bash
-# build onnxruntime 1.10 by benjaminwan
+# build onnxruntime 1.11 by benjaminwan
 # CMakeFiles/onnxruntime.dir/link.txt/link/lib*.a
 
 function collectLibs() {
+  # shared lib
   cmake --build . --config Release --target install
   rm -r -f install/bin
+  echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" > install/OnnxRuntimeConfig.cmake
+  echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >> install/OnnxRuntimeConfig.cmake
+  echo "link_directories(\${CMAKE_CURRENT_LIST_DIR}/lib)" >> install/OnnxRuntimeConfig.cmake
+  echo "set(OnnxRuntime_LIBS onnxruntime)" >> install/OnnxRuntimeConfig.cmake
+
+  # static lib
   mkdir -p install-static/lib
   cp -r install/include install-static
-  cp libonnxruntime_session.a install-static/lib
-  cp libonnxruntime_optimizer.a install-static/lib
-  cp libonnxruntime_providers.a install-static/lib
-  cp libonnxruntime_util.a install-static/lib
-  cp libonnxruntime_framework.a install-static/lib
-  cp libonnxruntime_graph.a install-static/lib
-  cp libonnxruntime_mlas.a install-static/lib
-  cp libonnxruntime_common.a install-static/lib
-  cp libonnxruntime_flatbuffers.a install-static/lib
-  cp external/onnx/libonnx.a install-static/lib
-  cp external/onnx/libonnx_proto.a install-static/lib
-  cp external/protobuf/cmake/libprotobuf-lite.a install-static/lib
-  cp external/re2/libre2.a install-static/lib
-  cp external/flatbuffers/libflatbuffers.a install-static/lib
-  cp external/pytorch_cpuinfo/libcpuinfo.a install-static/lib
-  cp external/pytorch_cpuinfo/deps/clog/libclog.a install-static/lib
-  cp external/nsync/libnsync_cpp.a install-static/lib
+  link=$(cat CMakeFiles/onnxruntime.dir/link.txt)
+  regex="lib.*.a$"
+  libs=""
+  for var in $link; do
+    if [[ ${var} =~ ${regex} ]]; then
+      echo cp ${var} install-static/lib
+      cp ${var} install-static/lib
+      name=$(echo $var | grep -E ${regex} -o)
+      name=${name#lib}
+      name=${name%.a}
+      libs="${libs} ${name}"
+    fi
+  done
+  echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" > install-static/OnnxRuntimeConfig.cmake
+  echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >> install-static/OnnxRuntimeConfig.cmake
+  echo "link_directories(\${CMAKE_CURRENT_LIST_DIR}/lib)" >> install-static/OnnxRuntimeConfig.cmake
+  echo "set(OnnxRuntime_LIBS $libs)" >> install-static/OnnxRuntimeConfig.cmake
 }
 
 function cmakeParamsMac() {

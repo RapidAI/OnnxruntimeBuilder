@@ -12,9 +12,9 @@ jobs:
         python-version: [ 3.8.5 ]
 
     env:
-      ONNX_VERSION: v1.10.0
-      SHARED_PKG_NAME: onnxruntime-1.10.0-ubuntu1804-shared
-      STATIC_PKG_NAME: onnxruntime-1.10.0-ubuntu1804-static
+      ONNX_VERSION: v1.11.0
+      SHARED_PKG_NAME: onnxruntime-1.11.0-ubuntu1804-shared
+      STATIC_PKG_NAME: onnxruntime-1.11.0-ubuntu1804-static
 
     steps:
       # 检出代码
@@ -51,11 +51,9 @@ jobs:
       - name: 7zip
         run: |
           mv onnxruntime-${{ env.ONNX_VERSION }}/build/Linux/Release/install linux
-          cp cmake/shared/OnnxRuntimeConfig.cmake linux
           7z a ${{ env.SHARED_PKG_NAME }}.7z linux
           rm -r -f linux
           mv onnxruntime-${{ env.ONNX_VERSION }}/build/Linux/Release/install-static linux
-          cp cmake/static/linux_macos/OnnxRuntimeConfig.cmake linux
           7z a ${{ env.STATIC_PKG_NAME }}.7z linux
           rm -r -f linux
 
