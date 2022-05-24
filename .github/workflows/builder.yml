@@ -135,69 +135,69 @@ jobs:
           name: ${{ env.STATIC_PKG_NAME }}
           path: ${{ env.STATIC_PKG_NAME }}.7z
 
-  windows-vs2019:
-    runs-on: windows-2019
-
-    env:
-      ONNX_VERSION: v1.11.0
-      SHARED_PKG_NAME: onnxruntime-1.11.0-vs2019-shared
-      STATIC_PKG_NAME: onnxruntime-1.11.0-vs2019-static
-
-    steps:
-      # 检出代码
-      - uses: actions/checkout@v2
-
-      # 检出onnxruntime
-      - name: checkout onnxruntime
-        uses: actions/checkout@v2
-        with:
-          repository: microsoft/onnxruntime
-          path: onnxruntime-${{ env.ONNX_VERSION }}
-          ref: ${{ env.ONNX_VERSION }}
-          submodules: recursive
-
-      # 复制编译脚本
-      - name: copy build script
-        run: |
-          cp build-onnxruntime-vs2019.bat onnxruntime-${{ env.ONNX_VERSION }}
-          cp onnxruntime_cmake_options.txt onnxruntime-${{ env.ONNX_VERSION }}
-
-      # 编译
-      - name: build
-        run: |
-          cd onnxruntime-${{ env.ONNX_VERSION }}
-          ./build-onnxruntime-vs2019.bat
-
-      # install文件夹改名，并使用7z压缩
-      - name: 7zip
-        run: |
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64/Release/install windows-x64
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x86/Release/install windows-x86
-          7z a ${{ env.SHARED_PKG_NAME }}.7z windows-x64 windows-x86
-          rm -r -Force windows-x64
-          rm -r -Force windows-x86
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64/Release/install-static windows-x64
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x86/Release/install-static windows-x86
-          7z a ${{ env.STATIC_PKG_NAME }}.7z windows-x64 windows-x86
-          rm -r -Force windows-x64
-          rm -r -Force windows-x86
-
-      # 上传artifact
-      - name: upload
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.SHARED_PKG_NAME }}
-          path: ${{ env.SHARED_PKG_NAME }}.7z
-
-      # 上传artifact
-      - name: upload
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.STATIC_PKG_NAME }}
-          path: ${{ env.STATIC_PKG_NAME }}.7z
+#  windows-vs2019:
+#    runs-on: windows-2019
+#
+#    env:
+#      ONNX_VERSION: v1.11.0
+#      SHARED_PKG_NAME: onnxruntime-1.11.0-vs2019-shared
+#      STATIC_PKG_NAME: onnxruntime-1.11.0-vs2019-static
+#
+#    steps:
+#      # 检出代码
+#      - uses: actions/checkout@v2
+#
+#      # 检出onnxruntime
+#      - name: checkout onnxruntime
+#        uses: actions/checkout@v2
+#        with:
+#          repository: microsoft/onnxruntime
+#          path: onnxruntime-${{ env.ONNX_VERSION }}
+#          ref: ${{ env.ONNX_VERSION }}
+#          submodules: recursive
+#
+#      # 复制编译脚本
+#      - name: copy build script
+#        run: |
+#          cp build-onnxruntime-vs2019.bat onnxruntime-${{ env.ONNX_VERSION }}
+#          cp onnxruntime_cmake_options.txt onnxruntime-${{ env.ONNX_VERSION }}
+#
+#      # 编译
+#      - name: build
+#        run: |
+#          cd onnxruntime-${{ env.ONNX_VERSION }}
+#          ./build-onnxruntime-vs2019.bat
+#
+#      # install文件夹改名，并使用7z压缩
+#      - name: 7zip
+#        run: |
+#          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64/Release/install windows-x64
+#          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x86/Release/install windows-x86
+#          7z a ${{ env.SHARED_PKG_NAME }}.7z windows-x64 windows-x86
+#          rm -r -Force windows-x64
+#          rm -r -Force windows-x86
+#          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64/Release/install-static windows-x64
+#          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x86/Release/install-static windows-x86
+#          7z a ${{ env.STATIC_PKG_NAME }}.7z windows-x64 windows-x86
+#          rm -r -Force windows-x64
+#          rm -r -Force windows-x86
+#
+#      # 上传artifact
+#      - name: upload
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: ${{ env.SHARED_PKG_NAME }}
+#          path: ${{ env.SHARED_PKG_NAME }}.7z
+#
+#      # 上传artifact
+#      - name: upload
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: ${{ env.STATIC_PKG_NAME }}
+#          path: ${{ env.STATIC_PKG_NAME }}.7z
 
   release:
-    needs: [ ubuntu1804, macos1015, windows-vs2019 ]
+    needs: [ ubuntu1804, macos1015 ]
 
     runs-on: ubuntu-latest
 
@@ -294,27 +294,27 @@ jobs:
           asset_name: ${{ env.PKG_NAME }}.7z
           asset_content_type: application/x-7z-compressed
 
-      - name: upload-windows-vs2019-shared
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.11.0-vs2019-shared
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
-          asset_name: ${{ env.PKG_NAME }}.7z
-          asset_content_type: application/x-7z-compressed
-
-      - name: upload-windows-vs2019-static
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.11.0-vs2019-static
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
-          asset_name: ${{ env.PKG_NAME }}.7z
-          asset_content_type: application/x-7z-compressed
+#      - name: upload-windows-vs2019-shared
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          PKG_NAME: onnxruntime-1.11.0-vs2019-shared
+#        with:
+#          upload_url: ${{ steps.create-release.outputs.upload_url }}
+#          asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
+#          asset_name: ${{ env.PKG_NAME }}.7z
+#          asset_content_type: application/x-7z-compressed
+#
+#      - name: upload-windows-vs2019-static
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          PKG_NAME: onnxruntime-1.11.0-vs2019-static
+#        with:
+#          upload_url: ${{ steps.create-release.outputs.upload_url }}
+#          asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
+#          asset_name: ${{ env.PKG_NAME }}.7z
+#          asset_content_type: application/x-7z-compressed
 
       # 获取指定时区的时间
       # https://github.com/marketplace/actions/get-time-action
