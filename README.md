@@ -45,3 +45,6 @@ Starting from this release, all ONNX Runtime CPU packages are now built without 
 
 #### 20220928
 1.12.0
+
+#### 20220929
+1.12.1
