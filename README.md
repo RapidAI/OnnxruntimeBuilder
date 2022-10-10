@@ -28,6 +28,10 @@ Starting from this release, all ONNX Runtime CPU packages are now built without 
 
 这是与官方Release不同的地方，敬请注意!
 
+### 关于Windows静态链接msvc
+在onnxruntime_cmake_options.txt中添加--enable_msvc_static_runtime
+本仓库的release默认使用msvc动态库，要静态链接msvc请自行编译
+
 #### 20211011
 从1.9.0开始，移除OpenMP编译选项，保持与官方一致
 
