@@ -6,8 +6,10 @@ SETLOCAL EnableDelayedExpansion
 
 for /f "Delims=" %%x in (onnxruntime_cmake_options.txt) do set OPTIONS=!OPTIONS!%%x 
 
-call :cmakeParamsX64 "Visual Studio 16 2019"
-call :cmakeParamsX86 "Visual Studio 16 2019"
+call :cmakeParams "Visual Studio 16 2019" "x64" "md"
+call :cmakeParams "Visual Studio 16 2019" "x86" "md"
+call :cmakeParams "Visual Studio 16 2019" "x64" "mt"
+call :cmakeParams "Visual Studio 16 2019" "x86" "mt"
 GOTO:EOF
 
 :getFileName
@@ -46,22 +48,24 @@ echo link_directories(${CMAKE_CURRENT_LIST_DIR}/lib) >> install-static\OnnxRunti
 echo set(OnnxRuntime_LIBS %libs%) >> install-static\OnnxRuntimeConfig.cmake
 GOTO:EOF
 
-:cmakeParamsX64
-call build.bat --cmake_generator "%~1" --build_dir build-x64 --update ^
+:cmakeParams
+if "%~2" == "x86" (
+    set MACHINE_FLAG="--x86"
+)^
+else (
+    set MACHINE_FLAG=
+)
+if "%~3" == "mt" (
+    set STATIC_CRT_FLAG="--enable_msvc_static_runtime"
+)^
+else (
+    set STATIC_CRT_FLAG=
+)
+call build.bat --cmake_generator "%~1" --build_dir "build-%~2-%~3" %MACHINE_FLAG% --update ^
 	--cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF ^
     --config Release ^
-    %OPTIONS%
-pushd build-x64\Release
-call :collectLibs
-popd
-GOTO:EOF
-
-:cmakeParamsX86
-call build.bat --cmake_generator "%~1" --build_dir build-x86 --x86 --update ^
-	--cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF ^
-    --config Release ^
-    %OPTIONS%
-pushd build-x86\Release
+    %OPTIONS% %STATIC_CRT_FLAG%
+pushd "build-%~2-%~3"\Release
 call :collectLibs
 popd
 GOTO:EOF
