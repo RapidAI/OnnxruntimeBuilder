@@ -246,13 +246,13 @@ jobs:
           echo "previousTag:$previousTag ~ lastTag:$lastTag"
           log=$(git log $previousTag..$lastTag --pretty=format:'- %cd %an: %s\n' --date=format:'%Y-%m-%d %H:%M:%S')
           echo "$log"
-          echo "::set-output name=log::"$log""
+          echo "log_state="$log"" >> $GITHUB_ENV
 
       # 创建Changelog文件 triggered by git tag push
       - name: Generate Changelog
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          echo -e '${{ steps.git-log.outputs.log }}' > Release.txt
+          echo -e '${{ env.log_state }}' > Release.txt
 
       # 下载artifact
       - name: download
