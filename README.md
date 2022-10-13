@@ -53,6 +53,6 @@ Starting from this release, all ONNX Runtime CPU packages are now built without 
 1.12.1
 
 #### 20221013
-windows平台，更早版本的包均为md版，从此版增加链接静态CRT版本(mt)
-后缀md: 无
-后缀mt: --enable_msvc_static_runtime
+- windows平台，更早版本的包均为md版，从此版增加链接静态CRT版本(mt)
+- 后缀md: 无
+- 后缀mt: --enable_msvc_static_runtime
