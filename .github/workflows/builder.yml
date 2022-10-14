@@ -381,5 +381,5 @@ jobs:
         with:
           url: ${{ secrets.DINGTALK_WEBHOOK }}
           method: POST
-          payload: '{"msgtype": "text", "text": {"content": "版本更新: ${{ github.repository }}-版本号: ${{ github.ref }} \n 发布时间： ${{ steps.time.outputs.time }} \n 距上个正式版的更新记录: \n${{ steps.git-log.outputs.log }}"}}'
+          payload: '{"msgtype": "text", "text": {"content": "版本更新: ${{ github.repository }}-版本号: ${{ github.ref }} \n 发布时间： ${{ steps.time.outputs.time }} \n 距上个正式版的更新记录: \n${{ env.log_state }}"}}'
           headers: '{"Content-Type": "application/json"}'
