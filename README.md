@@ -15,9 +15,11 @@ Onnxruntime Builder
 仓库的Release的包不支持GPU，仅使用CPU。
 
 ### windows版本特别说明
+
 虽然v1.6.0支持vs2017，但是因为v1.7.0在vs2017下编译出错，所以windows环境下就仅保留了vs2019版本。
 
 ### 关于OpenMP
+
 [官方v1.7.0版本说明](https://github.com/microsoft/onnxruntime/releases/tag/v1.7.0)
 
 Starting from this release, all ONNX Runtime CPU packages are now built without OpenMP.
@@ -29,30 +31,43 @@ Starting from this release, all ONNX Runtime CPU packages are now built without 
 这是与官方Release不同的地方，敬请注意!
 
 ### 关于Windows静态链接CRT
+
 编译选项添加--enable_msvc_static_runtime
 
 #### 20211011
+
 从1.9.0开始，移除OpenMP编译选项，保持与官方一致
 
 #### 20220521
+
 1.9.1
 
 #### 20220523
+
 1.10.0
 
 #### 20220524
+
 1.11.0
 
 #### 20220525
+
 1.11.1
 
 #### 20220928
+
 1.12.0
 
 #### 20220929
+
 1.12.1
 
 #### 20221013
+
 - windows平台，更早版本的包均为md版，从此版增加链接静态CRT版本(mt)
 - 后缀md: 无
 - 后缀mt: --enable_msvc_static_runtime
+
+#### 20221026
+
+1.13.1
