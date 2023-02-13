@@ -16,9 +16,9 @@ jobs:
         python-version: [ 3.8.5 ]
 
     env:
-      ONNX_VERSION: v1.13.1
-      SHARED_PKG_NAME: onnxruntime-1.13.1-ubuntu1804-shared
-      STATIC_PKG_NAME: onnxruntime-1.13.1-ubuntu1804-static
+      ONNX_VERSION: v1.14.0
+      SHARED_PKG_NAME: onnxruntime-1.14.0-ubuntu1804-shared
+      STATIC_PKG_NAME: onnxruntime-1.14.0-ubuntu1804-static
 
     steps:
       # 检出代码
@@ -78,9 +78,9 @@ jobs:
     runs-on: macos-10.15
 
     env:
-      ONNX_VERSION: v1.13.1
-      SHARED_PKG_NAME: onnxruntime-1.13.1-macos1015-shared
-      STATIC_PKG_NAME: onnxruntime-1.13.1-macos1015-static
+      ONNX_VERSION: v1.14.0
+      SHARED_PKG_NAME: onnxruntime-1.14.0-macos1015-shared
+      STATIC_PKG_NAME: onnxruntime-1.14.0-macos1015-static
 
     steps:
       # 检出代码
@@ -139,9 +139,9 @@ jobs:
     runs-on: windows-2019
 
     env:
-      ONNX_VERSION: v1.13.1
-      SHARED_PKG_NAME: onnxruntime-1.13.1-vs2019-shared
-      STATIC_PKG_NAME: onnxruntime-1.13.1-vs2019-static
+      ONNX_VERSION: v1.14.0
+      SHARED_PKG_NAME: onnxruntime-1.14.0-vs2019-shared
+      STATIC_PKG_NAME: onnxruntime-1.14.0-vs2019-static
 
     steps:
       # 检出代码
@@ -282,7 +282,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.13.1-ubuntu1804-shared
+          PKG_NAME: onnxruntime-1.14.0-ubuntu1804-shared
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -293,7 +293,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.13.1-ubuntu1804-static
+          PKG_NAME: onnxruntime-1.14.0-ubuntu1804-static
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -304,7 +304,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.13.1-macos1015-shared
+          PKG_NAME: onnxruntime-1.14.0-macos1015-shared
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -315,7 +315,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.13.1-macos1015-static
+          PKG_NAME: onnxruntime-1.14.0-macos1015-static
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -326,7 +326,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.13.1-vs2019-shared-md
+          PKG_NAME: onnxruntime-1.14.0-vs2019-shared-md
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -337,7 +337,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.13.1-vs2019-static-md
+          PKG_NAME: onnxruntime-1.14.0-vs2019-static-md
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -348,7 +348,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.13.1-vs2019-shared-mt
+          PKG_NAME: onnxruntime-1.14.0-vs2019-shared-mt
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
@@ -359,7 +359,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: onnxruntime-1.13.1-vs2019-static-mt
+          PKG_NAME: onnxruntime-1.14.0-vs2019-static-mt
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: artifacts/${{ env.PKG_NAME }}/${{ env.PKG_NAME }}.7z
