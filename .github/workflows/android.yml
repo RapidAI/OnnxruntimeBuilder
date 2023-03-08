@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ONNX_VERSION: v1.14.0
-      SHARED_PKG_NAME: onnxruntime-1.14.0-android-shared
+      ONNX_VERSION: v1.14.1
+      SHARED_PKG_NAME: onnxruntime-1.14.1-android-shared
 
     steps:
       # 检出代码
