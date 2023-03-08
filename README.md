@@ -36,31 +36,31 @@ Starting from this release, all ONNX Runtime CPU packages are now built without 
 
 #### 20211011
 
-从1.9.0开始，移除OpenMP编译选项，保持与官方一致
+- 从1.9.0开始，移除OpenMP编译选项，保持与官方一致
 
 #### 20220521
 
-1.9.1
+- v1.9.1
 
 #### 20220523
 
-1.10.0
+- v1.10.0
 
 #### 20220524
 
-1.11.0
+- v1.11.0
 
 #### 20220525
 
-1.11.1
+- v1.11.1
 
 #### 20220928
 
-1.12.0
+- v1.12.0
 
 #### 20220929
 
-1.12.1
+- v1.12.1
 
 #### 20221013
 
@@ -70,8 +70,12 @@ Starting from this release, all ONNX Runtime CPU packages are now built without 
 
 #### 20221026
 
-1.13.1
+- v1.13.1
 
 #### 20230213
 
-1.14.0
+- v1.14.0
+
+#### 20230308
+
+- v1.14.1
