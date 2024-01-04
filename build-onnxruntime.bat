@@ -1,15 +1,31 @@
-:: build onnxruntime 1.11.0 for windows by benjaminwan
+:: build onnxruntime for windows by benjaminwan
 @ECHO OFF
 chcp 65001
 cls
 SETLOCAL EnableDelayedExpansion
 
-for /f "Delims=" %%x in (onnxruntime_cmake_options.txt) do set OPTIONS=!OPTIONS!%%x 
+IF "%1"=="" (
+    echo input VS_VER none, use v142
+	set VS_VER="v142"
+)^
+ELSE (
+	echo input VS_VER:%1
+    set VS_VER="%1"
+)
 
-call :cmakeParams "Visual Studio 16 2019" "x64" "md"
-call :cmakeParams "Visual Studio 16 2019" "x86" "md"
-call :cmakeParams "Visual Studio 16 2019" "x64" "mt"
-call :cmakeParams "Visual Studio 16 2019" "x86" "mt"
+IF "%2"=="" (
+    echo input CRT none, use mt
+	set CRT="mt"
+)^
+ELSE (
+	echo input CRT:%2
+    set CRT="%2"
+)
+
+for /f "Delims=" %%x in (onnxruntime_cmake_options.txt) do set OPTIONS=!OPTIONS!%%x
+
+call :cmakeParams "x64" %VS_VER% %CRT%
+call :cmakeParams "Win32" %VS_VER% %CRT%
 GOTO:EOF
 
 :getFileName
@@ -49,23 +65,26 @@ echo set(OnnxRuntime_LIBS %libs%) >> install-static\OnnxRuntimeConfig.cmake
 GOTO:EOF
 
 :cmakeParams
-if "%~2" == "x86" (
-    set MACHINE_FLAG="--x86"
+mkdir "build-%~1-%~2-%~3"
+pushd "build-%~1-%~2-%~3"
+if "%~3" == "md" (
+    set STATIC_CRT_ENABLED="OFF"
+	set STATIC_CRT_DISABLED="ON"
 )^
 else (
-    set MACHINE_FLAG=
+    set STATIC_CRT_ENABLED="ON"
+	set STATIC_CRT_DISABLED="OFF"
 )
-if "%~3" == "mt" (
-    set STATIC_CRT_FLAG="--enable_msvc_static_runtime"
-)^
-else (
-    set STATIC_CRT_FLAG=
-)
-call build.bat --cmake_generator "%~1" --build_dir "build-%~2-%~3" %MACHINE_FLAG% --update ^
-	--cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF ^
-    --config Release ^
-    %OPTIONS% %STATIC_CRT_FLAG%
-pushd "build-%~2-%~3"\Release
+
+cmake -A "%~1" -T "%~2,host=x64" -DCMAKE_INSTALL_PREFIX=install ^
+  -DCMAKE_BUILD_TYPE=Release -DCMAKE_CONFIGURATION_TYPES=Release ^
+  %OPTIONS% ^
+  -DONNX_USE_MSVC_STATIC_RUNTIME=%STATIC_CRT_ENABLED% ^
+  -Dprotobuf_MSVC_STATIC_RUNTIME=%STATIC_CRT_ENABLED% ^
+  -Dgtest_force_shared_crt=%STATIC_CRT_DISABLED% ^
+  ../cmake
+cmake --build . --config Release -j %NUMBER_OF_PROCESSORS%
+cmake --build . --config Release --target install
 call :collectLibs
 popd
 GOTO:EOF

@@ -1,5 +1,5 @@
-#!/bin/bash
-# build onnxruntime 1.11 by benjaminwan
+#!/usr/bin/env bash
+# build onnxruntime by benjaminwan
 # CMakeFiles/onnxruntime.dir/link.txt/link/lib*.a
 
 function collectLibs() {
@@ -33,22 +33,32 @@ function collectLibs() {
   echo "set(OnnxRuntime_LIBS $libs)" >> install-static/OnnxRuntimeConfig.cmake
 }
 
-function cmakeParamsMac() {
-  ./build.sh --config $1 \
-    $(cat ./onnxruntime_cmake_options.txt) \
-    --cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF
-
-  pushd build/MacOS/Release
+function cmakeBuild() {
+  mkdir -p "build-$1"
+  pushd "build-$1"
+  cmake -DCMAKE_BUILD_TYPE=$1 \
+    -DCMAKE_CONFIGURATION_TYPES=$1 \
+    -DCMAKE_INSTALL_PREFIX=install \
+    $(cat ../onnxruntime_cmake_options.txt) \
+    ../cmake
+  cmake --build . -j $NUM_THREADS
+  cmake --build . --target install
   collectLibs
   popd
 }
 
-function cmakeParamsLinux() {
-  ./build.sh --config $1 \
-    $(cat ./onnxruntime_cmake_options.txt) \
-    --cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF
-
-  pushd build/Linux/Release
+function cmakeCrossBuild() {
+  mkdir -p "build-$1"
+  pushd "build-$1"
+  cmake -DCMAKE_C_FLAGS="-static -pthread" -DCMAKE_CXX_FLAGS="-static -pthread" \
+    -DCMAKE_TOOLCHAIN_FILE=../musl-cross.toolchain.cmake \
+    -DCMAKE_BUILD_TYPE=$1 \
+    -DCMAKE_CONFIGURATION_TYPES=$1 \
+    -DCMAKE_INSTALL_PREFIX=install \
+    $(cat ../onnxruntime_cmake_options.txt) \
+    ../cmake
+  cmake --build . -j $NUM_THREADS
+  cmake --build . --target install
   collectLibs
   popd
 }
@@ -59,11 +69,21 @@ NUM_THREADS=1
 if [ $sysOS == "Darwin" ]; then
   #echo "I'm MacOS"
   NUM_THREADS=$(sysctl -n hw.ncpu)
-  cmakeParamsMac "Release"
+  cmakeBuild "Release"
 elif [ $sysOS == "Linux" ]; then
   #echo "I'm Linux"
   NUM_THREADS=$(grep ^processor /proc/cpuinfo | wc -l)
-  cmakeParamsLinux "Release"
+  if [ "$1" ] && [ "$2" ]; then
+    echo "TOOLCHAIN_NAME=$1"
+    echo "TOOLCHAIN_PATH=$2"
+    export TOOLCHAIN_NAME="$1"
+    export TOOLCHAIN_PATH="$2"
+    echo "cross build"
+    cmakeCrossBuild "Release"
+  else
+    echo "native build"
+    cmakeBuild "Release"
+  fi
 else
   echo "Other OS: $sysOS"
 fi

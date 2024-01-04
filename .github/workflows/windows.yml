@@ -1,4 +1,4 @@
-name: android
+name: windows
 
 on:
   workflow_dispatch:
@@ -7,12 +7,28 @@ on:
       - '*'
 
 jobs:
-  android:
-    runs-on: ubuntu-latest
+  windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        list:
+          - { win_ver: 2019, vs_name: vs2015, vs_ver: v140 }
+          - { win_ver: 2019, vs_name: vs2017, vs_ver: v141 }
+          - { win_ver: 2019, vs_name: vs2019, vs_ver: v142 }
+          - { win_ver: 2022, vs_name: vs2022, vs_ver: v143 }
+        crt:
+          [
+            md,
+            mt,
+          ]
+
+    runs-on: windows-${{ matrix.list.win_ver }}
+
+    name: windows-${{ matrix.list.vs_name }}-${{ matrix.crt }}
 
     env:
       ONNX_VERSION: v1.15.1
-      PKG_NAME: onnxruntime-1.15.1-android
+      PKG_NAME: onnxruntime-1.15.1-windows-${{ matrix.list.vs_name }}-${{ matrix.crt }}
 
     steps:
       # Setup JDK 11
@@ -21,10 +37,6 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-
-      # 删除ndk -g参数
-      - name: ndk del -g
-        run: sed -i -e '/^  -g$/d' $ANDROID_NDK_LATEST_HOME/build/cmake/android-legacy.toolchain.cmake
 
       # 检出代码
       - uses: actions/checkout@v3
@@ -41,33 +53,40 @@ jobs:
       # 复制编译脚本
       - name: copy build script
         run: |
-          cp build-onnxruntime-android.sh onnxruntime-${{ env.ONNX_VERSION }}
+          cp build-onnxruntime.bat onnxruntime-${{ env.ONNX_VERSION }}
           cp onnxruntime_cmake_options.txt onnxruntime-${{ env.ONNX_VERSION }}
 
       # 编译
       - name: build
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
-          chmod a+x build-onnxruntime-android.sh
-          ./build-onnxruntime-android.sh $ANDROID_NDK_LATEST_HOME
+          ./build-onnxruntime.bat ${{ matrix.list.vs_ver }} ${{ matrix.crt }}
 
       # install文件夹改名，并使用7z压缩
       - name: 7zip
         run: |
-          mkdir onnxruntime
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_armeabi-v7a/install onnxruntime/armeabi-v7a
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_arm64-v8a/install onnxruntime/arm64-v8a
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_x86/install onnxruntime/x86
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_x86_64/install onnxruntime/x86_64
-          mv onnxruntime-${{ env.ONNX_VERSION }}/OnnxRuntimeWrapper.cmake onnxruntime/OnnxRuntimeWrapper.cmake
-          7z a ${{ env.PKG_NAME }}.7z onnxruntime
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/install windows-x64
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Win32-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/install windows-x86
+          7z a ${{ env.PKG_NAME }}.7z windows-x64 windows-x86
+          rm windows-x64 -r -fo
+          rm windows-x86 -r -fo
 
       # 上传artifact
       - name: upload
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.PKG_NAME }}
-          path: ${{ env.PKG_NAME }}.7z
+          path: |
+            ${{ env.PKG_NAME }}.7z
+
+  release:
+    needs: [ windows ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # 检出代码
+      - uses: actions/checkout@v3
 
       # 获取所有的git log和tag
       - name: Unshallow
@@ -90,15 +109,26 @@ jobs:
         run: |
           echo -e '${{ env.log_state }}' > release.md
 
+      # 下载artifact
+      - name: download
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      # 查看artifact
+      - name: list artifact
+        run: |
+          tree artifacts
+
       # 创建release 上传release
       # https://github.com/marketplace/actions/create-release
-      - name: Create release and upload-archive
+      - name: upload-windows
         uses: ncipollo/release-action@v1
         with:
           prerelease: false
           name: onnxruntime ${{ github.ref }}
           bodyFile: release.md
-          artifacts: ${{ env.PKG_NAME }}.7z
+          artifacts: artifacts/*/*.7z
           allowUpdates: true
           artifactContentType: application/x-7z-compressed
           token: ${{ secrets.GITHUB_TOKEN }}

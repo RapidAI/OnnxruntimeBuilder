@@ -2,23 +2,33 @@ name: macos
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - '*'
 
 jobs:
-  macos1015:
-    runs-on: macos-10.15
+  macos:
+    runs-on: macos-latest
 
     env:
-      ONNX_VERSION: v1.12.1
-      SHARED_PKG_NAME: onnxruntime-1.12.1-macos1015-shared
-      STATIC_PKG_NAME: onnxruntime-1.12.1-macos1015-static
+      ONNX_VERSION: v1.15.1
+      SHARED_PKG_NAME: onnxruntime-1.15.1-macos-shared
+      STATIC_PKG_NAME: onnxruntime-1.15.1-macos-static
 
     steps:
+      # Setup JDK 11
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
       # 检出代码
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # 检出onnxruntime
       - name: checkout onnxruntime
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: microsoft/onnxruntime
           path: onnxruntime-${{ env.ONNX_VERSION }}
@@ -40,15 +50,16 @@ jobs:
       - name: build
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
-          chmod a+x build-onnxruntime.sh &&./build-onnxruntime.sh
+          chmod a+x build-onnxruntime.sh
+          ./build-onnxruntime.sh
 
       # install文件夹改名macos，并使用7z压缩
       - name: 7z
         run: |
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build/MacOS/Release/install macos
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Release/install macos
           7z a ${{ env.SHARED_PKG_NAME }}.7z macos
           rm -r -f macos
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build/MacOS/Release/install-static macos
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Release/install-static macos
           7z a ${{ env.STATIC_PKG_NAME }}.7z macos
           rm -r -f macos
 
@@ -64,3 +75,37 @@ jobs:
         with:
           name: ${{ env.STATIC_PKG_NAME }}
           path: ${{ env.STATIC_PKG_NAME }}.7z
+
+      # 获取所有的git log和tag
+      - name: Unshallow
+        run: git fetch --prune --unshallow
+
+      # 获取git log 从 previousTag 到 lastTag
+      - name: Get git log
+        id: git-log
+        run: |
+          previousTag=$(git describe --abbrev=0 --tags `git rev-list --tags --skip=1 --max-count=1`)
+          lastTag=$(git describe --abbrev=0 --tags)
+          echo "previousTag:$previousTag ~ lastTag:$lastTag"
+          log=$(git log $previousTag..$lastTag --pretty=format:'- %cd %an: %s\n' --date=format:'%Y-%m-%d %H:%M:%S')
+          echo "$log"
+          echo "log_state="$log"" >> $GITHUB_ENV
+
+      # 创建Changelog文件 triggered by git tag push
+      - name: Generate Changelog
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo -e '${{ env.log_state }}' > release.md
+
+      # 创建release 上传release
+      # https://github.com/marketplace/actions/create-release
+      - name: Create release and upload-archive
+        uses: ncipollo/release-action@v1
+        with:
+          prerelease: false
+          name: onnxruntime ${{ github.ref }}
+          bodyFile: release.md
+          artifacts: ${{ env.SHARED_PKG_NAME }}.7z, ${{ env.STATIC_PKG_NAME }}.7z
+          allowUpdates: true
+          artifactContentType: application/x-7z-compressed
+          token: ${{ secrets.GITHUB_TOKEN }}

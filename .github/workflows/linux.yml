@@ -2,70 +2,171 @@ name: linux
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - '*'
 
 jobs:
-  ubuntu1804:
-    runs-on: ubuntu-18.04
+  linux:
+    runs-on: ubuntu-22.04
 
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [ 3.8.5 ]
+        arch_type:
+          [
+            aarch64-linux-musl,
+            aarch64_be-linux-musl,
+            arm-linux-musleabi,
+            arm-linux-musleabihf,
+            armeb-linux-musleabi,
+            armeb-linux-musleabihf,
+            armel-linux-musleabi,
+            armel-linux-musleabihf,
+            armv5l-linux-musleabi,
+            armv5l-linux-musleabihf,
+            armv6-linux-musleabi,
+            armv6-linux-musleabihf,
+            armv7l-linux-musleabihf,
+            armv7m-linux-musleabi,
+            armv7r-linux-musleabihf,
+            i486-linux-musl,
+            i686-linux-musl,
+            m68k-linux-musl,
+            mips-linux-musl,
+            mips-linux-muslsf,
+            mips-linux-musln32sf,
+            mips64-linux-musl,
+            mips64-linux-musln32,
+            mips64-linux-musln32sf,
+            mips64el-linux-musl,
+            mips64el-linux-musln32,
+            mips64el-linux-musln32sf,
+            mipsel-linux-musl,
+            mipsel-linux-musln32,
+            mipsel-linux-musln32sf,
+            mipsel-linux-muslsf,
+            or1k-linux-musl,
+            powerpc-linux-musl,
+            powerpc-linux-muslsf,
+            powerpc64-linux-musl,
+            powerpc64le-linux-musl,
+            powerpcle-linux-musl,
+            powerpcle-linux-muslsf,
+            riscv32-linux-musl,
+            riscv64-linux-musl,
+            s390x-linux-musl,
+            sh2-linux-musl,
+            sh2eb-linux-musl,
+            sh4-linux-musl,
+            sh4eb-linux-musl,
+            x86_64-linux-musl,
+            x86_64-linux-muslx32,
+          ]
+
+    name: ${{ matrix.arch_type }}
 
     env:
-      ONNX_VERSION: v1.12.1
-      SHARED_PKG_NAME: onnxruntime-1.12.1-ubuntu1804-shared
-      STATIC_PKG_NAME: onnxruntime-1.12.1-ubuntu1804-static
+      TOOLCHAIN_VERSION: 20231224
+      ONNX_VERSION: v1.15.1
+      PKG_NAME_PREFIX: onnxruntime-1.15.1
 
     steps:
-      # 检出代码
-      - uses: actions/checkout@v2
-
-      # 配置Python环境 onnxruntime要求python minor version: expecting python 3.6+
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      # Setup JDK 11
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
         with:
-          python-version: ${{ matrix.python-version }}
+          java-version: '11'
+          distribution: 'adopt'
+
+      # 检出代码
+      - uses: actions/checkout@v3
+
+      # 部署musl
+      - name: deploy musl
+        run: |
+          wget https://github.com/benjaminwan/musl-cross-builder/releases/download/${{ env.TOOLCHAIN_VERSION }}/${{ matrix.arch_type }}.7z -O ${{ matrix.arch_type }}.7z
+          7z x ${{ matrix.arch_type }}.7z -aoa
+          mv ${{ matrix.arch_type }}/ /opt/${{ matrix.arch_type }}/
 
       # 检出onnxruntime
       - name: checkout onnxruntime
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: microsoft/onnxruntime
           path: onnxruntime-${{ env.ONNX_VERSION }}
           ref: ${{ env.ONNX_VERSION }}
           submodules: recursive
 
-      # 复制编译脚本
-      - name: copy build script
+      # 复制
+      - name: copy
         run: |
           cp build-onnxruntime.sh onnxruntime-${{ env.ONNX_VERSION }}
           cp onnxruntime_cmake_options.txt onnxruntime-${{ env.ONNX_VERSION }}
+          wget https://github.com/benjaminwan/musl-cross-builder/raw/main/musl-cross.toolchain.cmake -O musl-cross.toolchain.cmake
+          cp musl-cross.toolchain.cmake onnxruntime-${{ env.ONNX_VERSION }}
 
       # 编译
       - name: build
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
-          chmod a+x build-onnxruntime.sh &&./build-onnxruntime.sh
+          chmod a+x build-onnxruntime.sh 
+          ./build-onnxruntime.sh "${{ matrix.arch_type }}" "/opt/${{ matrix.arch_type }}"
 
       # install文件夹改名linux，并使用7z压缩
       - name: 7zip
         run: |
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build/Linux/Release/install linux
-          7z a ${{ env.SHARED_PKG_NAME }}.7z linux
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Release/install linux
+          7z a ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-shared.7z linux
           rm -r -f linux
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build/Linux/Release/install-static linux
-          7z a ${{ env.STATIC_PKG_NAME }}.7z linux
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Release/install-static linux
+          7z a ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-static.7z linux
           rm -r -f linux
 
       # 上传artifact
       - name: upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.SHARED_PKG_NAME }}
-          path: ${{ env.SHARED_PKG_NAME }}.7z
+          name: ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-shared
+          path: ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-shared.7z
 
+      # 上传artifact
       - name: upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.STATIC_PKG_NAME }}
-          path: ${{ env.STATIC_PKG_NAME }}.7z
+          name: ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-static
+          path: ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-static.7z
+
+      # 获取所有的git log和tag
+      - name: Unshallow
+        run: git fetch --prune --unshallow
+
+      # 获取git log 从 previousTag 到 lastTag
+      - name: Get git log
+        id: git-log
+        run: |
+          previousTag=$(git describe --abbrev=0 --tags `git rev-list --tags --skip=1 --max-count=1`)
+          lastTag=$(git describe --abbrev=0 --tags)
+          echo "previousTag:$previousTag ~ lastTag:$lastTag"
+          log=$(git log $previousTag..$lastTag --pretty=format:'- %cd %an: %s\n' --date=format:'%Y-%m-%d %H:%M:%S')
+          echo "$log"
+          echo "log_state="$log"" >> $GITHUB_ENV
+
+      # 创建Changelog文件 triggered by git tag push
+      - name: Generate Changelog
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo -e '${{ env.log_state }}' > release.md
+
+      # 创建release 上传release
+      # https://github.com/marketplace/actions/create-release
+      - name: Create release and upload-archive
+        uses: ncipollo/release-action@v1
+        with:
+          prerelease: false
+          name: onnxruntime ${{ github.ref }}
+          bodyFile: release.md
+          artifacts: ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-*.7z
+          allowUpdates: true
+          artifactContentType: application/x-7z-compressed
+          token: ${{ secrets.GITHUB_TOKEN }}
