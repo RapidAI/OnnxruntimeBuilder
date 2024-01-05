@@ -70,10 +70,12 @@ pushd "build-%~1-%~2-%~3"
 if "%~3" == "md" (
     set STATIC_CRT_ENABLED="OFF"
 	set STATIC_CRT_DISABLED="ON"
+	set STATIC_CRT_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
 )^
 else (
     set STATIC_CRT_ENABLED="ON"
 	set STATIC_CRT_DISABLED="OFF"
+	set STATIC_CRT_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>"
 )
 
 cmake -A "%~1" -T "%~2,host=x64" -DCMAKE_INSTALL_PREFIX=install ^
@@ -82,6 +84,7 @@ cmake -A "%~1" -T "%~2,host=x64" -DCMAKE_INSTALL_PREFIX=install ^
   -DONNX_USE_MSVC_STATIC_RUNTIME=%STATIC_CRT_ENABLED% ^
   -Dprotobuf_MSVC_STATIC_RUNTIME=%STATIC_CRT_ENABLED% ^
   -Dgtest_force_shared_crt=%STATIC_CRT_DISABLED% ^
+  -DCMAKE_MSVC_RUNTIME_LIBRARY=%STATIC_CRT_LIBRARY% ^
   ../cmake
 cmake --build . --config Release -j %NUMBER_OF_PROCESSORS%
 cmake --build . --config Release --target install

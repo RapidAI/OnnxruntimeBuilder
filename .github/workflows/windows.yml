@@ -12,8 +12,6 @@ jobs:
       fail-fast: false
       matrix:
         list:
-          - { win_ver: 2019, vs_name: vs2015, vs_ver: v140 }
-          - { win_ver: 2019, vs_name: vs2017, vs_ver: v141 }
           - { win_ver: 2019, vs_name: vs2019, vs_ver: v142 }
           - { win_ver: 2022, vs_name: vs2022, vs_ver: v143 }
         crt:
