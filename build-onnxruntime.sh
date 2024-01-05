@@ -50,7 +50,7 @@ function cmakeBuild() {
 function cmakeCrossBuild() {
   mkdir -p "build-$1"
   pushd "build-$1"
-  cmake -DCMAKE_C_FLAGS="-static -pthread" -DCMAKE_CXX_FLAGS="-static -pthread" \
+  cmake -DCMAKE_C_FLAGS="-pthread" -DCMAKE_CXX_FLAGS="-pthread" \
     -DCMAKE_TOOLCHAIN_FILE=../musl-cross.toolchain.cmake \
     -DCMAKE_BUILD_TYPE=$1 \
     -DCMAKE_CONFIGURATION_TYPES=$1 \
