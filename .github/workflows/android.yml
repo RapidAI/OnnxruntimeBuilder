@@ -24,7 +24,7 @@ jobs:
 
       # 删除ndk -g参数
       - name: ndk del -g
-        run: sed -i -e '/^  -g$/d' $ANDROID_NDK_LATEST_HOME/build/cmake/android-legacy.toolchain.cmake
+        run: sed -i -e '/^  -g$/d' $ANDROID_NDK_HOME/build/cmake/android-legacy.toolchain.cmake
 
       # 检出代码
       - uses: actions/checkout@v3
@@ -49,18 +49,18 @@ jobs:
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
           chmod a+x build-onnxruntime-android.sh
-          ./build-onnxruntime-android.sh $ANDROID_NDK_LATEST_HOME
+          ./build-onnxruntime-android.sh $ANDROID_NDK_HOME
 
       # install文件夹改名，并使用7z压缩
       - name: 7zip
         run: |
-          mkdir onnxruntime
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_armeabi-v7a/install onnxruntime/armeabi-v7a
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_arm64-v8a/install onnxruntime/arm64-v8a
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_x86/install onnxruntime/x86
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_x86_64/install onnxruntime/x86_64
-          mv onnxruntime-${{ env.ONNX_VERSION }}/OnnxRuntimeWrapper.cmake onnxruntime/OnnxRuntimeWrapper.cmake
-          7z a ${{ env.PKG_NAME }}.7z onnxruntime
+          mkdir onnxruntime-android
+          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_armeabi-v7a/install onnxruntime-android/armeabi-v7a
+          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_arm64-v8a/install onnxruntime-android/arm64-v8a
+          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_x86/install onnxruntime-android/x86
+          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_x86_64/install onnxruntime-android/x86_64
+          mv onnxruntime-${{ env.ONNX_VERSION }}/OnnxRuntimeWrapper.cmake onnxruntime-android/OnnxRuntimeWrapper.cmake
+          7z a ${{ env.PKG_NAME }}.7z onnxruntime-android
 
       # 上传artifact
       - name: upload

@@ -8,7 +8,7 @@ function cmakeParams() {
   cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CONFIGURATION_TYPES=Release \
     -DCMAKE_INSTALL_PREFIX=install \
     -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
-    -DANDROID_ABI=$1 -DANDROID_MIN_SDK=$2 \
+    -DANDROID_ABI=$1 -DANDROID_MIN_SDK=$2 -DANDROID_PLATFORM=android-$2\
     $(cat ../onnxruntime_cmake_options.txt) \
     ../cmake
   cmake --build . --config Release -j $NUM_THREADS
