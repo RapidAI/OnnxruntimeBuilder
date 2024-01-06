@@ -10,9 +10,18 @@ jobs:
   android:
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        list:
+          - { arch: armeabi-v7a, min: 19 }
+          - { arch: arm64-v8a, min: 21 }
+          - { arch: x86, min: 19 }
+          - { arch: x86_64 , min: 21 }
+
     env:
       ONNX_VERSION: v1.15.1
-      PKG_NAME: onnxruntime-1.15.1-android
+      PKG_NAME: onnxruntime-${{ env.ONNX_VERSION }}-${{ matrix.list.arch }}
 
     steps:
       # Setup JDK 11
@@ -49,18 +58,13 @@ jobs:
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
           chmod a+x build-onnxruntime-android.sh
-          ./build-onnxruntime-android.sh $ANDROID_NDK_HOME
+          ./build-onnxruntime-android.sh ${{ matrix.list.arch }} ${{ matrix.list.min }} $ANDROID_NDK_HOME
 
-      # install文件夹改名，并使用7z压缩
+      # 7z压缩
       - name: 7zip
         run: |
-          mkdir onnxruntime-android
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_armeabi-v7a/install onnxruntime-android/armeabi-v7a
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_arm64-v8a/install onnxruntime-android/arm64-v8a
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_x86/install onnxruntime-android/x86
-          mv onnxruntime-${{ env.ONNX_VERSION }}/Release_x86_64/install onnxruntime-android/x86_64
-          mv onnxruntime-${{ env.ONNX_VERSION }}/OnnxRuntimeWrapper.cmake onnxruntime-android/OnnxRuntimeWrapper.cmake
-          7z a ${{ env.PKG_NAME }}.7z onnxruntime-android
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-${{ matrix.list.arch }}/install ${{ matrix.list.arch }}
+          7z a ${{ env.PKG_NAME }}.7z ${{ matrix.list.arch }}
 
       # 上传artifact
       - name: upload
@@ -68,6 +72,19 @@ jobs:
         with:
           name: ${{ env.PKG_NAME }}
           path: ${{ env.PKG_NAME }}.7z
+
+  release:
+    needs: [ windows ]
+
+    runs-on: ubuntu-latest
+
+    env:
+      ONNX_VERSION: v1.15.1
+      PKG_NAME: onnxruntime-${{ env.ONNX_VERSION }}-android
+
+    steps:
+      # 检出代码
+      - uses: actions/checkout@v3
 
       # 获取所有的git log和tag
       - name: Unshallow
@@ -89,6 +106,29 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           echo -e '${{ env.log_state }}' > release.md
+
+      # 下载artifact
+      - name: download
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      # 查看artifact
+      - name: list artifact
+        run: |
+          tree artifacts
+
+      # 合并
+      - name: merge
+        run: |
+          mkdir onnxruntime-android
+          mv artifacts/*/*.7z artifacts/
+          find artifacts/*.7z -exec 7z x {} -aoa -oonnxruntime-android \;
+          pushd onnxruntime-android
+          echo "message(\"OnnxRuntime Path: \${CMAKE_CURRENT_LIST_DIR}/\${ANDROID_ABI}\")" > OnnxRuntimeWrapper.cmake
+          echo "set(OnnxRuntime_DIR \"\${CMAKE_CURRENT_LIST_DIR}/\${ANDROID_ABI}\")" >> OnnxRuntimeWrapper.cmake
+          pop
+          7z a ${{ env.PKG_NAME }}.7z onnxruntime-android
 
       # 创建release 上传release
       # https://github.com/marketplace/actions/create-release
