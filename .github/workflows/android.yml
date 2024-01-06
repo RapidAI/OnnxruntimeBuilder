@@ -21,7 +21,7 @@ jobs:
 
     env:
       ONNX_VERSION: v1.15.1
-      PKG_NAME: onnxruntime-1.15.1-${{ matrix.list.arch }}
+      PKG_NAME_PREFIX: onnxruntime-1.15.1-${{ matrix.list.arch }}
 
     steps:
       # Setup JDK 11
@@ -64,14 +64,24 @@ jobs:
       - name: 7zip
         run: |
           mv onnxruntime-${{ env.ONNX_VERSION }}/build-${{ matrix.list.arch }}/install ${{ matrix.list.arch }}
-          7z a ${{ env.PKG_NAME }}.7z ${{ matrix.list.arch }}
+          7z a ${{ env.PKG_NAME_PREFIX }}-shared.7z ${{ matrix.list.arch }}
+          rm -r -f ${{ matrix.list.arch }}
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-${{ matrix.list.arch }}/install-static ${{ matrix.list.arch }}
+          7z a ${{ env.PKG_NAME_PREFIX }}-static.7z ${{ matrix.list.arch }}
+          rm -r -f ${{ matrix.list.arch }}
 
       # 上传artifact
       - name: upload
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.PKG_NAME }}
-          path: ${{ env.PKG_NAME }}.7z
+          name: ${{ env.PKG_NAME_PREFIX }}-shared
+          path: ${{ env.PKG_NAME_PREFIX }}-shared.7z
+
+      - name: upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.PKG_NAME_PREFIX }}-static
+          path: ${{ env.PKG_NAME_PREFIX }}-static.7z
 
   release:
     needs: [ android ]
@@ -122,13 +132,24 @@ jobs:
       - name: merge
         run: |
           mkdir onnxruntime-android
-          mv artifacts/*/*.7z artifacts/
-          find artifacts/*.7z -exec 7z x {} -aoa -oonnxruntime-android \;
+          mv artifacts/*/*-shared.7z artifacts/
+          find artifacts/*-shared.7z -exec 7z x {} -aoa -oonnxruntime-android \;
           pushd onnxruntime-android
           echo "message(\"OnnxRuntime Path: \${CMAKE_CURRENT_LIST_DIR}/\${ANDROID_ABI}\")" > OnnxRuntimeWrapper.cmake
           echo "set(OnnxRuntime_DIR \"\${CMAKE_CURRENT_LIST_DIR}/\${ANDROID_ABI}\")" >> OnnxRuntimeWrapper.cmake
           popd
-          7z a ${{ env.PKG_NAME }}.7z onnxruntime-android
+          7z a ${{ env.PKG_NAME }}-shared.7z onnxruntime-android
+          rm -r -f onnxruntime-android
+          mkdir onnxruntime-android
+          mv artifacts/*/*-static.7z artifacts/
+          find artifacts/*-static.7z -exec 7z x {} -aoa -oonnxruntime-android \;
+          pushd onnxruntime-android
+          echo "message(\"OnnxRuntime Path: \${CMAKE_CURRENT_LIST_DIR}/\${ANDROID_ABI}\")" > OnnxRuntimeWrapper.cmake
+          echo "set(OnnxRuntime_DIR \"\${CMAKE_CURRENT_LIST_DIR}/\${ANDROID_ABI}\")" >> OnnxRuntimeWrapper.cmake
+          popd
+          7z a ${{ env.PKG_NAME }}-static.7z onnxruntime-android
+          rm -r -f onnxruntime-android
+          find artifacts/*-static.7z -exec rm {} \;
 
       # 创建release 上传release
       # https://github.com/marketplace/actions/create-release
@@ -138,7 +159,7 @@ jobs:
           prerelease: false
           name: onnxruntime ${{ github.ref }}
           bodyFile: release.md
-          artifacts: ${{ env.PKG_NAME }}.7z
+          artifacts: ${{ env.PKG_NAME }}-shared.7z,${{ env.PKG_NAME }}-static.7z
           allowUpdates: true
           artifactContentType: application/x-7z-compressed
           token: ${{ secrets.GITHUB_TOKEN }}

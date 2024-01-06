@@ -2,13 +2,35 @@
 # build onnxruntime by benjaminwan
 # CMakeFiles/onnxruntime.dir/link.txt/link/lib*.a
 
-function createConfig() {
-  echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" >install/OnnxRuntimeConfig.cmake
-  echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >>install/OnnxRuntimeConfig.cmake
-  echo "link_directories(\${CMAKE_CURRENT_LIST_DIR}/lib)" >>install/OnnxRuntimeConfig.cmake
-  echo "set(OnnxRuntime_LIBS onnxruntime)" >>install/OnnxRuntimeConfig.cmake
-  echo "add_library(\${OnnxRuntime_LIBS} SHARED IMPORTED)" >>install/OnnxRuntimeConfig.cmake
-  echo "set_target_properties(\${OnnxRuntime_LIBS} PROPERTIES IMPORTED_LOCATION \${CMAKE_CURRENT_LIST_DIR}/lib/libonnxruntime.so)" >>install/OnnxRuntimeConfig.cmake
+function collectLibs() {
+    # create shared lib config
+    echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" >install/OnnxRuntimeConfig.cmake
+    echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >>install/OnnxRuntimeConfig.cmake
+    echo "link_directories(\${CMAKE_CURRENT_LIST_DIR}/lib)" >>install/OnnxRuntimeConfig.cmake
+    echo "set(OnnxRuntime_LIBS onnxruntime)" >>install/OnnxRuntimeConfig.cmake
+    echo "add_library(\${OnnxRuntime_LIBS} SHARED IMPORTED)" >>install/OnnxRuntimeConfig.cmake
+    echo "set_target_properties(\${OnnxRuntime_LIBS} PROPERTIES IMPORTED_LOCATION \${CMAKE_CURRENT_LIST_DIR}/lib/libonnxruntime.so)" >>install/OnnxRuntimeConfig.cmake
+
+    # static lib
+    mkdir -p install-static/lib
+    cp -r install/include install-static
+    link=$(cat CMakeFiles/onnxruntime.dir/link.txt)
+    regex="lib.*.a$"
+    libs=""
+    for var in $link; do
+        if [[ ${var} =~ ${regex} ]]; then
+            echo cp ${var} install-static/lib
+            cp ${var} install-static/lib
+            name=$(echo $var | grep -E ${regex} -o)
+            name=${name#lib}
+            name=${name%.a}
+            libs="${libs} ${name}"
+        fi
+    done
+    echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" > install-static/OnnxRuntimeConfig.cmake
+    echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >> install-static/OnnxRuntimeConfig.cmake
+    echo "link_directories(\${CMAKE_CURRENT_LIST_DIR}/lib)" >> install-static/OnnxRuntimeConfig.cmake
+    echo "set(OnnxRuntime_LIBS $libs)" >> install-static/OnnxRuntimeConfig.cmake
 }
 
 function cmakeParams() {
@@ -22,7 +44,7 @@ function cmakeParams() {
     ../cmake
   cmake --build . --config Release -j $NUM_THREADS
   cmake --build . --config Release --target install
-  createConfig
+  collectLibs
   popd
 }
 
