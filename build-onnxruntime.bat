@@ -22,7 +22,7 @@ ELSE (
     set CRT="%2"
 )
 
-for /f "Delims=" %%x in (onnxruntime_cmake_options.txt) do set OPTIONS=!OPTIONS!%%x
+for /f "Delims=" %%x in (onnxruntime_cmake_options.txt) do set OPTIONS=!OPTIONS! %%x
 
 call :cmakeParams "x64" %VS_VER% %CRT%
 call :cmakeParams "Win32" %VS_VER% %CRT%
