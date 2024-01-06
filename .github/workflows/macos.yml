@@ -12,8 +12,8 @@ jobs:
 
     env:
       ONNX_VERSION: v1.15.1
-      SHARED_PKG_NAME: onnxruntime-${{ env.ONNX_VERSION }}-macos-shared
-      STATIC_PKG_NAME: onnxruntime-${{ env.ONNX_VERSION }}-macos-static
+      SHARED_PKG_NAME: onnxruntime-1.15.1-macos-shared
+      STATIC_PKG_NAME: onnxruntime-1.15.1-macos-static
 
     steps:
       # Setup JDK 11

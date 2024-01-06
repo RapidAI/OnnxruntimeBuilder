@@ -69,7 +69,7 @@ jobs:
     env:
       TOOLCHAIN_VERSION: 20231224
       ONNX_VERSION: v1.15.1
-      PKG_NAME_PREFIX: onnxruntime-${{ env.ONNX_VERSION }}
+      PKG_NAME_PREFIX: onnxruntime-1.15.1
 
     steps:
       # Setup JDK 11

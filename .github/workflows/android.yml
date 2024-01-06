@@ -21,7 +21,7 @@ jobs:
 
     env:
       ONNX_VERSION: v1.15.1
-      PKG_NAME: onnxruntime-${{ env.ONNX_VERSION }}-${{ matrix.list.arch }}
+      PKG_NAME: onnxruntime-1.15.1-${{ matrix.list.arch }}
 
     steps:
       # Setup JDK 11
@@ -74,13 +74,13 @@ jobs:
           path: ${{ env.PKG_NAME }}.7z
 
   release:
-    needs: [ windows ]
+    needs: [ android ]
 
     runs-on: ubuntu-latest
 
     env:
       ONNX_VERSION: v1.15.1
-      PKG_NAME: onnxruntime-${{ env.ONNX_VERSION }}-android
+      PKG_NAME: onnxruntime-1.15.1-android
 
     steps:
       # 检出代码
@@ -127,7 +127,7 @@ jobs:
           pushd onnxruntime-android
           echo "message(\"OnnxRuntime Path: \${CMAKE_CURRENT_LIST_DIR}/\${ANDROID_ABI}\")" > OnnxRuntimeWrapper.cmake
           echo "set(OnnxRuntime_DIR \"\${CMAKE_CURRENT_LIST_DIR}/\${ANDROID_ABI}\")" >> OnnxRuntimeWrapper.cmake
-          pop
+          popd
           7z a ${{ env.PKG_NAME }}.7z onnxruntime-android
 
       # 创建release 上传release

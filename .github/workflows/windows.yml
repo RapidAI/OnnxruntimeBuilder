@@ -26,7 +26,7 @@ jobs:
 
     env:
       ONNX_VERSION: v1.15.1
-      PKG_NAME: onnxruntime-${{ env.ONNX_VERSION }}-windows-${{ matrix.list.vs_name }}-${{ matrix.crt }}
+      PKG_NAME: onnxruntime-1.15.1-windows-${{ matrix.list.vs_name }}-${{ matrix.crt }}
 
     steps:
       # Setup JDK 11
