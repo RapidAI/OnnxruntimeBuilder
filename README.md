@@ -14,9 +14,19 @@ Onnxruntime Builder
 
 仓库的Release的包不支持GPU，仅使用CPU。
 
+### Release文件说明
+- 文件名包含windows，linux，macos，android，代表这4种操作系统平台使用的库;
+- 文件名包含shared代表动态库(windows是onnxruntime.dll，linux是onnxruntime.so，macos是onnxruntime.dylib);
+- 文件名包含static代表静态库(***.a);
+- 动态库在部署时也必须跟编译出来的可以执行文件一起部署，而静态库编译时会被包含到可执行文件里;
+- 静态库部署起来更方便些，但可执行文件体积增大，各有优缺点，按需选择;
+- linux版支持不同cpu架构，一般家用pc选择x86_64-linux-musl即可;
+- linux版使用musl工具链编译，故最终项目最好也用musl工具链，musl工具链优点是支持静态链接libc，部署时不需要依赖系统的libc库;
+- windows版文件名含md代表动态链接crt，文件名含mt代表静态链接crt，静态链接时不需要依赖标准c库，部署时更方便，但文件体积增大;
+
 ### windows版本特别说明
 
-虽然v1.6.0支持vs2017，但是因为v1.7.0在vs2017下编译出错，所以windows环境下就仅保留了vs2019版本。
+虽然v1.6.0支持vs2017，从v1.7.0开始在vs2017或vs2015下编译出错，所以windows环境下仅支持vs2019和vs2022版本。
 
 ### 关于OpenMP
 
@@ -32,7 +42,15 @@ Starting from this release, all ONNX Runtime CPU packages are now built without 
 
 ### 关于Windows静态链接CRT
 
-编译选项添加--enable_msvc_static_runtime
+如果使用自带python编译工具，需要添加--enable_msvc_static_runtime
+相应的cmake编译选项添加
+
+```
+-DONNX_USE_MSVC_STATIC_RUNTIME=ON
+-Dprotobuf_MSVC_STATIC_RUNTIME=ON
+-Dgtest_force_shared_crt=OFF
+-DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>"
+```
 
 #### 20211011
 
@@ -83,3 +101,10 @@ Starting from this release, all ONNX Runtime CPU packages are now built without 
 #### 20230623
 
 - v1.15.0
+
+#### 20240105
+
+- v1.15.1
+- 改用cmake 编译
+- 使用musl toolchain编译交叉linux版
+- windows版增加vs2022
