@@ -6,18 +6,11 @@ Onnxruntime Builder
 
 编译onnxruntime 动态库和静态库。
 
-动态库: onnxruntime-版本号-编译环境-shared.7z
-
-静态库: onnxruntime-版本号-编译环境-static.7z
-
-包内添加了简单的cmake，用于cmake系统find_package.
-
-仓库的Release的包不支持GPU，仅使用CPU。
-
-### Release文件说明
-- 文件名包含windows，linux，macos，android，代表这4种操作系统平台使用的库;
 - 文件名包含shared代表动态库(windows是onnxruntime.dll，linux是onnxruntime.so，macos是onnxruntime.dylib);
 - 文件名包含static代表静态库(***.a);
+- 包内添加了简单的cmake，用于cmake系统find_package.
+- 仓库的Release的包不支持GPU，仅使用CPU。
+- 文件名包含windows，linux，macos，android，代表这4种操作系统平台使用的库;
 - 动态库在部署时也必须跟编译出来的可以执行文件一起部署，而静态库编译时会被包含到可执行文件里;
 - 静态库部署起来更方便些，但可执行文件体积增大，各有优缺点，按需选择;
 - linux版支持不同cpu架构，一般家用pc选择x86_64-linux-musl即可;
@@ -26,24 +19,20 @@ Onnxruntime Builder
 
 ### windows版本特别说明
 
-虽然v1.6.0支持vs2017，从v1.7.0开始在vs2017或vs2015下编译出错，所以windows环境下仅支持vs2019和vs2022版本。
+v1.6.0以下支持vs2017，从v1.7.0开始在windows环境下仅支持vs2019和vs2022版本。
 
 ### 关于OpenMP
 
-[官方v1.7.0版本说明](https://github.com/microsoft/onnxruntime/releases/tag/v1.7.0)
-
-Starting from this release, all ONNX Runtime CPU packages are now built without OpenMP.
-
-从1.7.0开始，官方Release的所有CPU版的包编译时没有启用OpenMP选项。
-
-但是本仓库的编译脚本仍然启用了OpenMP选项，即使用本仓库的包时，编译环境要求安装OpenMP。
-
-这是与官方Release不同的地方，敬请注意!
+- [官方v1.7.0版本说明](https://github.com/microsoft/onnxruntime/releases/tag/v1.7.0)
+  Starting from this release, all ONNX Runtime CPU packages are now built without OpenMP.
+- 官方仓库Release的从1.7.0开始，所有CPU版的包编译时没有启用OpenMP选项；
+- 本仓库的初始版~1.8.0仍然启用了OpenMP选项，即使用本仓库的这些包时，编译环境要求安装OpenMP；
+- 从1.9.0开始，本仓库移除OpenMP编译选项，保持与官方一致；
 
 ### 关于Windows静态链接CRT
 
-如果使用自带python编译工具，需要添加--enable_msvc_static_runtime
-相应的cmake编译选项添加
+如果使用官方仓库自带python编译脚本，需要添加--enable_msvc_static_runtime
+本仓库使用的cmake编译选项添加
 
 ```
 -DONNX_USE_MSVC_STATIC_RUNTIME=ON
