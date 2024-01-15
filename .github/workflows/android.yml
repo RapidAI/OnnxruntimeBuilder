@@ -89,8 +89,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ONNX_VERSION: v1.15.1
-      PKG_NAME: onnxruntime-1.15.1-android
+      ONNX_VERSION: v1.16.3
+      PKG_NAME: onnxruntime-1.16.3-android
 
     steps:
       # 检出代码
