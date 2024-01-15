@@ -25,7 +25,7 @@ jobs:
     name: windows-${{ matrix.list.vs_name }}-${{ matrix.crt }}
 
     env:
-      ONNX_VERSION: v1.15.1
+      ONNX_VERSION: v1.16.3
       SHARED_PKG_NAME: onnxruntime-1.15.1-windows-${{ matrix.list.vs_name }}-shared-${{ matrix.crt }}
       STATIC_PKG_NAME: onnxruntime-1.15.1-windows-${{ matrix.list.vs_name }}-static-${{ matrix.crt }}
 
