@@ -21,7 +21,7 @@ jobs:
 
     env:
       ONNX_VERSION: v1.16.3
-      PKG_NAME_PREFIX: onnxruntime-1.15.1-${{ matrix.list.arch }}
+      PKG_NAME_PREFIX: onnxruntime-1.16.3-${{ matrix.list.arch }}
 
     steps:
       # Setup JDK 11
