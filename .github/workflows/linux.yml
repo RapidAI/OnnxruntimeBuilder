@@ -16,52 +16,17 @@ jobs:
         arch_type:
           [
             aarch64-linux-musl,
-            aarch64_be-linux-musl,
-            arm-linux-musleabi,
-            arm-linux-musleabihf,
-            armeb-linux-musleabi,
-            armeb-linux-musleabihf,
-            armel-linux-musleabi,
-            armel-linux-musleabihf,
-            armv5l-linux-musleabi,
-            armv5l-linux-musleabihf,
-            armv6-linux-musleabi,
-            armv6-linux-musleabihf,
-            armv7l-linux-musleabihf,
-            armv7m-linux-musleabi,
-            armv7r-linux-musleabihf,
-            i486-linux-musl,
-            i686-linux-musl,
-            m68k-linux-musl,
-            mips-linux-musl,
-            mips-linux-muslsf,
-            mips-linux-musln32sf,
-            mips64-linux-musl,
-            mips64-linux-musln32,
-            mips64-linux-musln32sf,
             mips64el-linux-musl,
-            mips64el-linux-musln32,
-            mips64el-linux-musln32sf,
             mipsel-linux-musl,
             mipsel-linux-musln32,
             mipsel-linux-musln32sf,
             mipsel-linux-muslsf,
-            or1k-linux-musl,
-            powerpc-linux-musl,
-            powerpc-linux-muslsf,
-            powerpc64-linux-musl,
-            powerpc64le-linux-musl,
-            powerpcle-linux-musl,
-            powerpcle-linux-muslsf,
             riscv32-linux-musl,
             riscv64-linux-musl,
-            s390x-linux-musl,
             sh2-linux-musl,
-            sh2eb-linux-musl,
-            sh4-linux-musl,
-            sh4eb-linux-musl,
             x86_64-linux-musl,
             x86_64-linux-muslx32,
+            x86_64-ubuntu-gnu,
           ]
 
     name: ${{ matrix.arch_type }}
@@ -69,7 +34,7 @@ jobs:
     env:
       TOOLCHAIN_VERSION: 20231224
       ONNX_VERSION: v1.16.3
-      PKG_NAME_PREFIX: onnxruntime-1.16.1
+      PKG_NAME_PREFIX: onnxruntime-1.16.3
 
     steps:
       # Setup JDK 11
@@ -84,6 +49,7 @@ jobs:
 
       # 部署musl
       - name: deploy musl
+        if: matrix.arch_type != 'x86_64-ubuntu-gnu'
         run: |
           wget https://github.com/benjaminwan/musl-cross-builder/releases/download/${{ env.TOOLCHAIN_VERSION }}/${{ matrix.arch_type }}.7z -O ${{ matrix.arch_type }}.7z
           7z x ${{ matrix.arch_type }}.7z -aoa
@@ -107,11 +73,19 @@ jobs:
           cp musl-cross.toolchain.cmake onnxruntime-${{ env.ONNX_VERSION }}
 
       # 编译
-      - name: build
+      - name: build musl
+        if: matrix.arch_type != 'x86_64-ubuntu-gnu'
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
           chmod a+x build-onnxruntime.sh 
           ./build-onnxruntime.sh "${{ matrix.arch_type }}" "/opt/${{ matrix.arch_type }}"
+
+      - name: build gnu
+        if: matrix.arch_type == 'x86_64-ubuntu-gnu'
+        run: |
+          cd onnxruntime-${{ env.ONNX_VERSION }}
+          chmod a+x build-onnxruntime.sh 
+          ./build-onnxruntime.sh
 
       # install文件夹改名linux，并使用7z压缩
       - name: 7zip
