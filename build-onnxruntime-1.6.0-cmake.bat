@@ -22,7 +22,15 @@ ELSE (
     set CRT="%2"
 )
 
-for /f "Delims=" %%x in (onnxruntime_cmake_options.txt) do set OPTIONS=!OPTIONS! %%x
+:: 1st sync submodule
+:: git submodule sync --recursive
+:: git submodule update --init --recursive
+
+:: 2nd patch source
+:: cd ../onnxruntime
+:: patch -p1 -i ../patchs/onnxruntime-1.6.0.patch
+
+for /f "Delims=" %%x in (onnxruntime_options-1.6.0.txt) do set OPTIONS=!OPTIONS! %%x
 
 call :cmakeParams "x64" %VS_VER% %CRT%
 call :cmakeParams "Win32" %VS_VER% %CRT%
@@ -43,6 +51,8 @@ GOTO:EOF
 :collectLibs
 cmake --build . --config Release --target install
 del /s/q install\*test*.exe
+copy install\include\onnxruntime\core\session\* install\include
+rd /S /Q install\include\onnxruntime
 echo set(OnnxRuntime_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include") > install/OnnxRuntimeConfig.cmake
 echo include_directories(${OnnxRuntime_INCLUDE_DIRS}) >> install/OnnxRuntimeConfig.cmake
 echo link_directories(${CMAKE_CURRENT_LIST_DIR}/lib) >> install/OnnxRuntimeConfig.cmake
@@ -69,22 +79,16 @@ mkdir "build-%~1-%~2-%~3"
 pushd "build-%~1-%~2-%~3"
 if "%~3" == "md" (
     set STATIC_CRT_ENABLED="OFF"
-	set STATIC_CRT_DISABLED="ON"
-	set STATIC_CRT_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
 )^
 else (
     set STATIC_CRT_ENABLED="ON"
-	set STATIC_CRT_DISABLED="OFF"
-	set STATIC_CRT_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>"
 )
 
-cmake -A "%~1" -T "%~2,host=x64" -DCMAKE_INSTALL_PREFIX=install ^
-  -DCMAKE_BUILD_TYPE=Release -DCMAKE_CONFIGURATION_TYPES=Release ^
+cmake -A "%~1" -T "%~2,host=x64" ^
+  -DCMAKE_BUILD_TYPE=Release ^
+  -DCMAKE_INSTALL_PREFIX=install ^
   %OPTIONS% ^
-  -DONNX_USE_MSVC_STATIC_RUNTIME=%STATIC_CRT_ENABLED% ^
-  -Dprotobuf_MSVC_STATIC_RUNTIME=%STATIC_CRT_ENABLED% ^
-  -Dgtest_force_shared_crt=%STATIC_CRT_DISABLED% ^
-  -DCMAKE_MSVC_RUNTIME_LIBRARY=%STATIC_CRT_LIBRARY% ^
+  -Donnxruntime_MSVC_STATIC_RUNTIME=%STATIC_CRT_ENABLED% ^
   ../cmake
 cmake --build . --config Release -j %NUMBER_OF_PROCESSORS%
 cmake --build . --config Release --target install

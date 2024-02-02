@@ -8,52 +8,40 @@ on:
 
 jobs:
   linux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        arch_type:
+        os_name: [ubuntu]
+        list:
+          - { os_ver: 14.04, os_id: trusty }
+          - { os_ver: 16.04, os_id: xenial }
+          - { os_ver: 18.04, os_id: bionic }
+          - { os_ver: 20.04, os_id: focal }
+        arch:
           [
-            aarch64-linux-musl,
-            mips64el-linux-musl,
-            mipsel-linux-musl,
-            mipsel-linux-musln32,
-            mipsel-linux-musln32sf,
-            mipsel-linux-muslsf,
-            riscv32-linux-musl,
-            riscv64-linux-musl,
-            sh2-linux-musl,
-            x86_64-linux-musl,
-            x86_64-linux-muslx32,
-            x86_64-ubuntu-gnu,
+            amd64,
+            arm,
+            arm64,
+            ppc64le,
           ]
 
-    name: ${{ matrix.arch_type }}
+    name: ${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}
 
     env:
-      TOOLCHAIN_VERSION: 20231224
-      ONNX_VERSION: v1.16.3
-      PKG_NAME_PREFIX: onnxruntime-1.16.3
+      CMAKE_VERSION: 3.28.1
+      PY_VERSION: 3.8.18
+      JDK_VERSION: openjdk-8-jdk
+      GRADLE_VERSION: 6.9.4
+      ONNX_VERSION: v1.6.0
+      BUILD_SCRIPT: build-onnxruntime-1.6.0-python.sh
+      SHARED_PKG_NAME: onnxruntime-1.6.0-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}-shared
+      STATIC_PKG_NAME: onnxruntime-1.6.0-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}-static
 
     steps:
-      # Setup JDK 11
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
       # 检出代码
       - uses: actions/checkout@v3
-
-      # 部署musl
-      - name: deploy musl
-        if: matrix.arch_type != 'x86_64-ubuntu-gnu'
-        run: |
-          wget https://github.com/benjaminwan/musl-cross-builder/releases/download/${{ env.TOOLCHAIN_VERSION }}/${{ matrix.arch_type }}.7z -O ${{ matrix.arch_type }}.7z
-          7z x ${{ matrix.arch_type }}.7z -aoa
-          mv ${{ matrix.arch_type }}/ /opt/${{ matrix.arch_type }}/
 
       # 检出onnxruntime
       - name: checkout onnxruntime
@@ -67,49 +55,92 @@ jobs:
       # 复制
       - name: copy
         run: |
-          cp build-onnxruntime.sh onnxruntime-${{ env.ONNX_VERSION }}
-          cp onnxruntime_cmake_options.txt onnxruntime-${{ env.ONNX_VERSION }}
-          wget https://github.com/benjaminwan/musl-cross-builder/raw/main/musl-cross.toolchain.cmake -O musl-cross.toolchain.cmake
-          cp musl-cross.toolchain.cmake onnxruntime-${{ env.ONNX_VERSION }}
+          cp ${{ env.BUILD_SCRIPT }} onnxruntime-${{ env.ONNX_VERSION }}
+          chmod a+x ${{ env.BUILD_SCRIPT }}
 
-      # 编译
-      - name: build musl
-        if: matrix.arch_type != 'x86_64-ubuntu-gnu'
+      - name: git submodule sync
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
-          chmod a+x build-onnxruntime.sh 
-          ./build-onnxruntime.sh "${{ matrix.arch_type }}" "/opt/${{ matrix.arch_type }}"
+          git submodule sync --recursive
+          git submodule update --init --recursive
 
-      - name: build gnu
-        if: matrix.arch_type == 'x86_64-ubuntu-gnu'
+      - name: patch source
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
-          chmod a+x build-onnxruntime.sh 
-          ./build-onnxruntime.sh
+          patch -p1 -i ../patchs/onnxruntime-1.6.0.patch
+
+      - name: Host - update
+        run: sudo apt-get update
+
+      - name: Host - Install host qemu-static
+        run: sudo apt-get install -y qemu binfmt-support qemu-user-static
+
+      - name: Host - Docker multiarch bootstrap
+        run: sudo docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+      - name: deploy cmake
+        run: |
+          wget https://github.com/benjaminwan/CmakeBuilder/releases/download/${{ env.CMAKE_VERSION }}/cmake-${{ env.CMAKE_VERSION }}-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}.7z -O cmake-${{ env.CMAKE_VERSION }}.7z
+          7z x cmake-${{ env.CMAKE_VERSION }}.7z -aoa
+
+      - name: deploy python
+        run: |
+          wget https://github.com/benjaminwan/PythonBuilder/releases/download/${{ env.PY_VERSION }}/python-${{ env.PY_VERSION }}-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}.7z -O python-${{ env.PY_VERSION }}.7z
+          7z x python-${{ env.PY_VERSION }}.7z -aoa
+
+      - name: deploy gradle
+        run: |
+          wget https://services.gradle.org/distributions/gradle-${{ env.GRADLE_VERSION }}-bin.zip -O gradle-${{ env.GRADLE_VERSION }}-bin.zip
+          7z x gradle-${{ env.GRADLE_VERSION }}-bin.zip -aoa
+
+      - name: Host - Create Docker template env file
+        run: |
+          echo "PATH=/root/cmake-${{ env.CMAKE_VERSION }}/bin:/root/python-${{ env.PY_VERSION }}/bin:/root/gradle-${{ env.GRADLE_VERSION }}/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" > env.custom
+          echo "DEBIAN_FRONTEND=noninteractive" >> env.custom
+          echo "TZ=Etc/UTC" >> env.custom
+
+      - name: Host - Create docker container
+        run: docker run --name ${{ matrix.os_name }} --env-file env.custom --platform linux/${{ matrix.arch }} -it -d -w /root -v ${{ github.workspace }}:/root ${{ matrix.os_name }}:${{ matrix.list.os_id }}
+
+      - name: Docker - apt-get update
+        run: docker exec --env-file env.custom -w /root ${{ matrix.os_name }} apt-get update
+
+      - name: Docker - install build deps
+        run: docker exec --env-file env.custom -w /root ${{ matrix.os_name }} apt-get install -y build-essential git software-properties-common
+
+      - name: Docker - install jdk
+        run: |
+          docker exec --env-file env.custom -w /root ${{ matrix.os_name }} add-apt-repository -y ppa:openjdk-r/ppa
+          docker exec --env-file env.custom -w /root ${{ matrix.os_name }} apt-get update
+          docker exec --env-file env.custom -w /root ${{ matrix.os_name }} apt-get install ${{ env.JDK_VERSION }}
+          docker exec --env-file env.custom -w /root ${{ matrix.os_name }} java -version
+
+      - name: Docker - build
+        run: docker exec --env-file env.custom -w /root/onnxruntime-${{ env.ONNX_VERSION }} ${{ matrix.os_name }} ./${{ env.BUILD_SCRIPT }}
 
       # install文件夹改名linux，并使用7z压缩
       - name: 7zip
         run: |
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Release/install linux
-          7z a ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-shared.7z linux
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Linux/Release/install linux
+          7z a ${{ env.SHARED_PKG_NAME }}.7z linux
           rm -r -f linux
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Release/install-static linux
-          7z a ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-static.7z linux
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Linux/Release/install-static linux
+          7z a ${{ env.STATIC_PKG_NAME }}.7z linux
           rm -r -f linux
 
       # 上传artifact
       - name: upload
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-shared
-          path: ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-shared.7z
+          name: ${{ env.SHARED_PKG_NAME }}
+          path: ${{ env.SHARED_PKG_NAME }}.7z
 
       # 上传artifact
       - name: upload
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-static
-          path: ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-static.7z
+          name: ${{ env.STATIC_PKG_NAME }}
+          path: ${{ env.STATIC_PKG_NAME }}.7z
 
       # 获取所有的git log和tag
       - name: Unshallow
@@ -138,9 +169,8 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           prerelease: false
-          name: onnxruntime ${{ github.ref }}
           bodyFile: release.md
-          artifacts: ${{ env.PKG_NAME_PREFIX }}-${{ matrix.arch_type }}-*.7z
+          artifacts: ${{ env.SHARED_PKG_NAME }}.7z, ${{ env.STATIC_PKG_NAME }}.7z
           allowUpdates: true
           artifactContentType: application/x-7z-compressed
           token: ${{ secrets.GITHUB_TOKEN }}

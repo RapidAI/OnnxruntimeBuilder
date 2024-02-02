@@ -1,0 +1,571 @@
+diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/logical/defs.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/logical/defs.cc
+--- onnxruntime/cmake/external/onnx/onnx/defs/logical/defs.cc	2024-01-30 17:48:57.582868125 +0800
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/logical/defs.cc	2024-01-30 11:40:51.000000000 +0800
+@@ -18,7 +18,6 @@ inline void unaryLogicalOpInference(Infe
+ std::function<void(OpSchema&)> BinaryLogicDocGenerator(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(
+         doc = R"DOC(
+ Returns the tensor resulted from performing the `{name}` logical operation
+ elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support).
+@@ -27,7 +26,7 @@ elementwise on the input tensors `A` and
+ )DOC";
+         ReplaceAll(doc, "{name}", name);
+         ReplaceAll(
+-            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str()););
++            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str());
+     schema.SetDoc(doc);
+     schema.Input(
+         0, 
+diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/logical/old.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/logical/old.cc
+--- onnxruntime/cmake/external/onnx/onnx/defs/logical/old.cc	2024-01-30 17:48:57.582868125 +0800
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/logical/old.cc	2024-01-30 11:41:07.000000000 +0800
+@@ -10,7 +10,7 @@ namespace ONNX_NAMESPACE {
+ std::function<void(OpSchema&)> BinaryLogicDocGenerator_opset12(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(
++    
+         doc = R"DOC(
+ Returns the tensor resulted from performing the `{name}` logical operation
+ elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support).
+@@ -19,7 +19,7 @@ elementwise on the input tensors `A` and
+ )DOC";
+         ReplaceAll(doc, "{name}", name);
+         ReplaceAll(
+-            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str()););
++            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str());
+     schema.SetDoc(doc);
+     schema.Input(0, "A", "First input operand for the logical operator.", "T");
+     schema.Input(1, "B", "Second input operand for the logical operator.", "T");
+@@ -101,7 +101,7 @@ std::function<void(OpSchema&)> BinaryLog
+     const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ Returns the tensor resulted from performing the `{name}` logical operation
+ elementwise on the input tensors `A` and `B`.
+ 
+@@ -109,7 +109,7 @@ If broadcasting is enabled, the right-ha
+ to match the shape of left-hand-side argument. See the doc of `Add` for a
+ detailed description of the broadcasting rules.
+ )DOC";
+-                        ReplaceAll(doc, "{name}", name););
++                        ReplaceAll(doc, "{name}", name);
+     schema.SetDoc(doc);
+     schema.Attr(
+         "broadcast",
+@@ -132,7 +132,7 @@ std::function<void(OpSchema&)> BinaryLog
+     const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(
++    
+         doc = R"DOC(
+ Returns the tensor resulted from performing the `{name}` logical operation
+ elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support).
+@@ -141,7 +141,7 @@ elementwise on the input tensors `A` and
+ )DOC";
+         ReplaceAll(doc, "{name}", name);
+         ReplaceAll(
+-            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str()););
++            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str());
+     schema.SetDoc(doc);
+     schema.Input(0, "A", "First input operand for the logical operator.", "T");
+     schema.Input(1, "B", "Second input operand for the logical operator.", "T");
+diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/math/defs.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/math/defs.cc
+--- onnxruntime/cmake/external/onnx/onnx/defs/math/defs.cc	2024-01-30 17:48:57.582868125 +0800
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/math/defs.cc	2024-01-30 11:41:58.000000000 +0800
+@@ -12,7 +12,6 @@ namespace ONNX_NAMESPACE {
+ std::function<void(OpSchema&)> MathDocGenerator(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(
+         doc = R"DOC(
+ Performs element-wise binary {name} (with Numpy-style broadcasting support).
+ 
+@@ -20,7 +19,7 @@ Performs element-wise binary {name} (wit
+ )DOC";
+         ReplaceAll(doc, "{name}", name);
+         ReplaceAll(
+-            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str()););
++            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str());
+     schema.SetDoc(doc);
+     schema.Input(0, 
+         "A", 
+@@ -67,7 +66,7 @@ std::function<void(OpSchema&)> SoftmaxFa
+     const char* equation) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ The operator computes the {description} values for the given input:
+ 
+  {equation}
+@@ -79,14 +78,14 @@ and contains the {name} values of the co
+ )DOC";
+                         ReplaceAll(doc, "{name}", name);
+                         ReplaceAll(doc, "{description}", description);
+-                        ReplaceAll(doc, "{equation}", equation););
++                        ReplaceAll(doc, "{equation}", equation);
+     std::string axis_attr;
+-    POPULATE_OP_DOC_STR(axis_attr = R"DOC(
++    axis_attr = R"DOC(
+ Describes the dimension {name} will be performed on. 
+ Negative value means counting dimensions 
+ from the back. Accepted range is [-r, r-1] where r = rank(input).,
+ )DOC";
+-                        ReplaceAll(axis_attr, "{name}", name););
++                        ReplaceAll(axis_attr, "{name}", name);
+     schema.SetDoc(doc);
+     schema.Attr(
+         "axis", axis_attr, AttributeProto::INT, static_cast<int64_t>(-1));
+@@ -1029,7 +1028,6 @@ std::function<void(OpSchema&)> Elementwi
+     const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(
+         doc = R"DOC(
+ Element-wise {name} of each of the input tensors (with Numpy-style broadcasting support).
+ All inputs and outputs must have the same data type.
+@@ -1037,7 +1035,7 @@ All inputs and outputs must have the sam
+ )DOC";
+         ReplaceAll(doc, "{name}", name);
+         ReplaceAll(
+-            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str()););
++            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str());
+     schema.SetDoc(doc);
+     schema.Input(
+         0,
+diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/math/old.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/math/old.cc
+--- onnxruntime/cmake/external/onnx/onnx/defs/math/old.cc	2024-01-30 17:48:57.582868125 +0800
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/math/old.cc	2024-01-30 11:42:40.000000000 +0800
+@@ -12,7 +12,7 @@ namespace ONNX_NAMESPACE {
+ std::function<void(OpSchema&)> MathDocGenerator_opset_7(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(
++    
+         doc = R"DOC(
+ Performs element-wise binary {name} (with Numpy-style broadcasting support).
+ 
+@@ -20,7 +20,7 @@ Performs element-wise binary {name} (wit
+ )DOC";
+         ReplaceAll(doc, "{name}", name);
+         ReplaceAll(
+-            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str()););
++            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str());
+     schema.SetDoc(doc);
+     schema.Input(0, "A", "First operand.", "T");
+     schema.Input(1, "B", "Second operand.", "T");
+@@ -65,7 +65,7 @@ std::function<void(OpSchema&)> SoftmaxFa
+     const char* description) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ The operator computes the {name} ({description}) values for each layer in the batch
+  of the given input.
+ 
+@@ -82,7 +82,7 @@ will throw errors. The output tensor has
+ and contains the {name} values of the corresponding input.
+ )DOC";
+                         ReplaceAll(doc, "{name}", name);
+-                        ReplaceAll(doc, "{description}", description););
++                        ReplaceAll(doc, "{description}", description);
+     schema.SetDoc(doc);
+     schema.Attr(
+         "axis",
+@@ -476,7 +476,6 @@ std::function<void(OpSchema&)> Elementwi
+     const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(
+         doc = R"DOC(
+ Element-wise {name} of each of the input tensors (with Numpy-style broadcasting support).
+ All inputs and outputs must have the same data type.
+@@ -484,7 +483,7 @@ All inputs and outputs must have the sam
+ )DOC";
+         ReplaceAll(doc, "{name}", name);
+         ReplaceAll(
+-            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str()););
++            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str());
+     schema.SetDoc(doc);
+     schema.Input(
+         0,
+@@ -1493,7 +1492,7 @@ std::function<void(OpSchema&)> SoftmaxFa
+     const char* description) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ The operator computes the {name} ({description}) values for each layer in the batch
+  of the given input. The input is a 2-D tensor (Tensor<float>) of size
+ (batch_size x input_feature_dimensions). The output tensor has the same shape
+@@ -1511,7 +1510,7 @@ Each of these dimensions must be matched
+ will throw errors.
+ )DOC";
+                         ReplaceAll(doc, "{name}", name);
+-                        ReplaceAll(doc, "{description}", description););
++                        ReplaceAll(doc, "{description}", description);
+     schema.SetDoc(doc);
+     schema.Attr(
+         "axis",
+@@ -1583,11 +1582,11 @@ Attribute `broadcast=1` needs to be pass
+ std::function<void(OpSchema&)> MathDocGenerator_old(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ Performs element-wise binary {name} (with limited broadcast support).
+ {broadcast_doc})DOC";
+                         ReplaceAll(doc, "{name}", name);
+-                        ReplaceAll(doc, "{broadcast_doc}", kBroadcastDoc_old););
++                        ReplaceAll(doc, "{broadcast_doc}", kBroadcastDoc_old);
+     schema.SetDoc(doc);
+     schema.Attr(
+         "broadcast",
+@@ -1630,11 +1629,11 @@ Performs element-wise binary {name} (wit
+ std::function<void(OpSchema&)> MathDocGenerator_old_opset6(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ Performs element-wise binary {name} (with limited broadcast support).
+ {broadcast_doc})DOC";
+                         ReplaceAll(doc, "{name}", name);
+-                        ReplaceAll(doc, "{broadcast_doc}", kBroadcastDoc_old););
++                        ReplaceAll(doc, "{broadcast_doc}", kBroadcastDoc_old);
+     schema.SetDoc(doc);
+     schema.Attr(
+         "broadcast",
+@@ -3153,7 +3152,6 @@ std::function<void(OpSchema&)> Elementwi
+     const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(
+         doc = R"DOC(
+ Element-wise {name} of each of the input tensors (with Numpy-style broadcasting support).
+ All inputs and outputs must have the same data type.
+@@ -3161,7 +3159,7 @@ All inputs and outputs must have the sam
+ )DOC";
+         ReplaceAll(doc, "{name}", name);
+         ReplaceAll(
+-            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str()););
++            doc, "{broadcast_doc}", GenerateBroadcastingDocMul().c_str());
+     schema.SetDoc(doc);
+     schema.Input(
+         0,
+diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/nn/defs.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/nn/defs.cc
+--- onnxruntime/cmake/external/onnx/onnx/defs/nn/defs.cc	2024-01-30 17:48:57.586867895 +0800
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/nn/defs.cc	2024-01-30 11:43:09.000000000 +0800
+@@ -207,7 +207,6 @@ std::function<void(OpSchema&)> PoolOpSch
+     bool supports8bit = false) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(
+         doc = R"DOC(
+  {name} consumes an input tensor X and applies {opName} pooling across
+  the tensor according to kernel sizes, stride sizes, and pad lengths.
+@@ -245,7 +244,7 @@ std::function<void(OpSchema&)> PoolOpSch
+             doc,
+             "{kernelSpatialShape}",
+             use_dilation ? "((kernel_spatial_shape[i] - 1) * dilations[i] + 1)"
+-                         : "kernel_spatial_shape[i]"););
++                         : "kernel_spatial_shape[i]");
+     schema.SetDoc(doc);
+     schema.Attr(
+         "kernel_shape",
+@@ -568,13 +567,13 @@ ONNX_OPERATOR_SET_SCHEMA(
+ std::function<void(OpSchema&)> LpPoolOpSchemaGenerator(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+  {name} consumes an input tensor X and applies Lp pooling across
+  the tensor according to kernel sizes, stride sizes, and pad lengths.
+  Lp pooling consisting of computing the Lp norm on all values of a subset
+  of the input tensor according to the kernel size and downsampling the
+  data into the output tensor Y for further processing.)DOC";
+-                        ReplaceAll(doc, "{name}", name););
++                        ReplaceAll(doc, "{name}", name);
+     schema.SetDoc(doc);
+     schema.Attr(
+         "kernel_shape",
+@@ -683,11 +682,11 @@ void roiPoolTypeShapeInference(Inference
+ std::function<void(OpSchema&)> RoiPoolOpSchemaGenerator(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+  ROI {name} pool consumes an input tensor X and region of interests (RoIs) to
+  apply {name} pooling across each RoI, to produce output 4-D tensor of shape
+  (num_rois, channels, pooled_shape[0], pooled_shape[1]).)DOC";
+-                        ReplaceAll(doc, "{name}", name););
++                        ReplaceAll(doc, "{name}", name);
+     schema.SetDoc(doc);
+     schema.Attr(
+         "pooled_shape",
+@@ -748,10 +747,10 @@ ONNX_OPERATOR_SET_SCHEMA(
+ std::function<void(OpSchema&)> ConvOpSchemaGenerator(const char* filter_desc) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ The convolution operator consumes an input tensor and {filter_desc}, and
+ computes the output.)DOC";
+-                        ReplaceAll(doc, "{filter_desc}", filter_desc););
++                        ReplaceAll(doc, "{filter_desc}", filter_desc);
+     schema.SetDoc(doc);
+     schema.Input(
+         0,
+@@ -1317,7 +1316,7 @@ std::function<void(OpSchema&)> ConvTrans
+     const char* filter_desc) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ The convolution transpose operator consumes an input tensor and {filter_desc},
+ and computes the output.
+ 
+@@ -1332,7 +1331,7 @@ output_shape can also be explicitly spec
+   Else: pads[start_i] = total_padding[i] - (total_padding[i]/2); pads[end_i] = (total_padding[i]/2).
+ 
+     )DOC";
+-                        ReplaceAll(doc, "{filter_desc}", filter_desc););
++                        ReplaceAll(doc, "{filter_desc}", filter_desc);
+     schema.SetDoc(doc);
+     schema.Input(
+         0,
+@@ -1478,12 +1477,12 @@ std::function<void(OpSchema&)> GlobalPoo
+     const char* op) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+  Global{op_type} consumes an input tensor X and applies {op} pooling across
+  the values in the same channel. This is equivalent to {op_type} with kernel size
+  equal to the spatial dimension of input tensor.)DOC";
+                         ReplaceAll(doc, "{op_type}", op_type);
+-                        ReplaceAll(doc, "{op}", op););
++                        ReplaceAll(doc, "{op}", op);
+     schema.SetDoc(doc);
+     schema.Input(
+         0,
+@@ -1535,12 +1534,12 @@ std::function<void(OpSchema&)> GlobalLpP
+     const char* op) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+  Global{op_type} consumes an input tensor X and applies {op} pooling across
+  the values in the same channel. This is equivalent to {op_type} with kernel size
+  equal to the spatial dimension of input tensor.)DOC";
+                         ReplaceAll(doc, "{op_type}", op_type);
+-                        ReplaceAll(doc, "{op}", op););
++                        ReplaceAll(doc, "{op}", op);
+     schema.SetDoc(doc);
+     schema.Attr(
+         "p",
+diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/nn/old.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/nn/old.cc
+--- onnxruntime/cmake/external/onnx/onnx/defs/nn/old.cc	2024-01-30 17:48:57.586867895 +0800
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/nn/old.cc	2024-01-30 11:43:38.000000000 +0800
+@@ -430,7 +430,6 @@ std::function<void(OpSchema&)> PoolOpSch
+     const char* additionalDescription) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(
+         doc = R"DOC(
+  {name} consumes an input tensor X and applies {opName} pooling across
+  the tensor according to kernel sizes, stride sizes, and pad lengths.
+@@ -456,7 +455,7 @@ std::function<void(OpSchema&)> PoolOpSch
+  )DOC";
+         ReplaceAll(doc, "{name}", name);
+         ReplaceAll(doc, "{opName}", opName);
+-        ReplaceAll(doc, "{additionalDescription}", additionalDescription););
++        ReplaceAll(doc, "{additionalDescription}", additionalDescription);
+     schema.SetDoc(doc);
+     schema.Attr(
+         "kernel_shape",
+@@ -523,7 +522,6 @@ std::function<void(OpSchema&)> PoolOpSch
+     int opsetNum) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(
+         doc = R"DOC(
+  {name} consumes an input tensor X and applies {opName} pooling across
+  the tensor according to kernel sizes, stride sizes, and pad lengths.
+@@ -561,7 +559,7 @@ std::function<void(OpSchema&)> PoolOpSch
+             doc,
+             "{kernelSpatialShape}",
+             use_dilation ? "((kernel_spatial_shape[i] - 1) * dilations[i] + 1)"
+-                         : "kernel_spatial_shape[i]"););
++                         : "kernel_spatial_shape[i]");
+     schema.SetDoc(doc);
+     schema.Attr(
+         "kernel_shape",
+@@ -1027,13 +1025,13 @@ ONNX_OPERATOR_SET_SCHEMA(
+ std::function<void(OpSchema&)> LpPoolOpSchemaGenerator_10(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+  {name} consumes an input tensor X and applies Lp pooling across
+  the tensor according to kernel sizes, stride sizes, and pad lengths.
+  Lp pooling consisting of computing the Lp norm on all values of a subset
+  of the input tensor according to the kernel size and downsampling the
+  data into the output tensor Y for further processing.)DOC";
+-                        ReplaceAll(doc, "{name}", name););
++                        ReplaceAll(doc, "{name}", name);
+     schema.SetDoc(doc);
+     schema.Attr(
+         "kernel_shape",
+@@ -1099,10 +1097,10 @@ std::function<void(OpSchema&)> ConvOpSch
+     const char* filter_desc) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ The convolution operator consumes an input tensor and {filter_desc}, and
+ computes the output.)DOC";
+-                        ReplaceAll(doc, "{filter_desc}", filter_desc););
++                        ReplaceAll(doc, "{filter_desc}", filter_desc);
+     schema.SetDoc(doc);
+     schema.Input(
+         0,
+@@ -1351,7 +1349,7 @@ std::function<void(OpSchema&)> ConvTrans
+     const char* filter_desc) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ The convolution transpose operator consumes an input tensor and {filter_desc},
+ and computes the output.
+ 
+@@ -1366,7 +1364,7 @@ output_shape can also be explicitly spec
+   Else: pads[start_i] = total_padding[i] - (total_padding[i]/2); pads[end_i] = (total_padding[i]/2).
+ 
+     )DOC";
+-                        ReplaceAll(doc, "{filter_desc}", filter_desc););
++                        ReplaceAll(doc, "{filter_desc}", filter_desc);
+     schema.SetDoc(doc);
+     schema.Input(
+         0,
+diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/reduction/defs.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/reduction/defs.cc
+--- onnxruntime/cmake/external/onnx/onnx/defs/reduction/defs.cc	2024-01-30 17:48:57.590867665 +0800
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/reduction/defs.cc	2024-01-30 11:43:56.000000000 +0800
+@@ -27,14 +27,14 @@ std::function<void(OpSchema&)> ReduceDoc
+     bool axes_input = false) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ Computes the {name} of the input tensor's element along the provided axes. The resulted
+ tensor has the same rank as the input if keepdims equal 1. If keepdims equal 0, then
+ the resulted tensor have the reduced dimension pruned.
+ 
+ The above behavior is similar to numpy, with the exception that numpy default keepdims to
+ False instead of True.)DOC";
+-                        ReplaceAll(doc, "{name}", name););
++                        ReplaceAll(doc, "{name}", name);
+     schema.SetDoc(doc.c_str());
+     schema.Attr(
+         "keepdims",
+@@ -214,7 +214,7 @@ ONNX_OPERATOR_SET_SCHEMA(
+ std::function<void(OpSchema&)> ArgReduceDocGenerator(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ Computes the indices of the {name} elements of the input tensor's element along the 
+ provided axis. The resulting tensor has the same rank as the input if keepdims equal 1. 
+ If keepdims equal 0, then the resulting tensor have the reduced dimension pruned. 
+@@ -222,7 +222,7 @@ If select_last_index is True (default Fa
+ is selected if the {name} appears more than once in the input. Otherwise the index of the 
+ first occurrence is selected.
+ The type of the output tensor is integer.)DOC";
+-                        ReplaceAll(doc, "{name}", name););
++                        ReplaceAll(doc, "{name}", name);
+     schema.SetDoc(doc.c_str());
+     schema.Attr(
+         "axis",
+diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/reduction/old.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/reduction/old.cc
+--- onnxruntime/cmake/external/onnx/onnx/defs/reduction/old.cc	2024-01-30 17:48:57.590867665 +0800
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/reduction/old.cc	2024-01-30 11:44:09.000000000 +0800
+@@ -25,14 +25,14 @@ std::function<void(OpSchema&)> ReduceDoc
+     bool supports_8bit_datatypes = false) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ Computes the {name} of the input tensor's element along the provided axes. The resulted
+ tensor has the same rank as the input if keepdims equal 1. If keepdims equal 0, then
+ the resulted tensor have the reduced dimension pruned.
+ 
+ The above behavior is similar to numpy, with the exception that numpy default keepdims to
+ False instead of True.)DOC";
+-                        ReplaceAll(doc, "{name}", name););
++                        ReplaceAll(doc, "{name}", name);
+     schema.SetDoc(doc.c_str());
+     schema.Attr(
+         "axes",
+@@ -152,7 +152,7 @@ ONNX_OPERATOR_SET_SCHEMA(
+ std::function<void(OpSchema&)> ArgReduceDocGenerator_opset12(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ Computes the indices of the {name} elements of the input tensor's element along the 
+ provided axis. The resulting tensor has the same rank as the input if keepdims equal 1. 
+ If keepdims equal 0, then the resulting tensor have the reduced dimension pruned. 
+@@ -160,7 +160,7 @@ If select_last_index is True (default Fa
+ is selected if the {name} appears more than once in the input. Otherwise the index of the 
+ first occurrence is selected.
+ The type of the output tensor is integer.)DOC";
+-                        ReplaceAll(doc, "{name}", name););
++                        ReplaceAll(doc, "{name}", name);
+     schema.SetDoc(doc.c_str());
+     schema.Attr(
+         "axis",
+@@ -247,14 +247,14 @@ std::function<void(OpSchema&)> ReduceDoc
+     int opset = 1) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ Computes the {name} of the input tensor's element along the provided axes. The resulted
+ tensor has the same rank as the input if keepdims equal 1. If keepdims equal 0, then
+ the resulted tensor have the reduced dimension pruned.
+ 
+ The above behavior is similar to numpy, with the exception that numpy default keepdims to
+ False instead of True.)DOC";
+-                        ReplaceAll(doc, "{name}", name););
++                        ReplaceAll(doc, "{name}", name);
+     schema.SetDoc(doc.c_str());
+     schema.Attr(
+         "axes",
+@@ -381,12 +381,12 @@ ONNX_OPERATOR_SET_SCHEMA(
+ std::function<void(OpSchema&)> ArgReduceDocGenerator_opset1(const char* name) {
+   return [=](OpSchema& schema) {
+     std::string doc;
+-    POPULATE_OP_DOC_STR(doc = R"DOC(
++    doc = R"DOC(
+ Computes the indices of the {name} elements of the input tensor's element along the
+ provided axis. The resulted tensor has the same rank as the input if keepdims equal 1.
+ If keepdims equal 0, then the resulted tensor have the reduced dimension pruned.
+ The type of the output tensor is integer.)DOC";
+-                        ReplaceAll(doc, "{name}", name););
++                        ReplaceAll(doc, "{name}", name);
+     schema.SetDoc(doc.c_str());
+     schema.Attr(
+         "axis",
+--- onnxruntime/cmake/CMakeLists.txt	2024-01-30 18:06:56.948107801 +0800
++++ onnxruntime-1.6.0-fix/cmake/CMakeLists.txt	2024-02-01 00:19:06.323435780 +0800
+@@ -1498,4 +1498,4 @@ if (WINDOWS_STORE)
+   endif()
+ endif()
+ 
+-include(flake8.cmake)
++#include(flake8.cmake)

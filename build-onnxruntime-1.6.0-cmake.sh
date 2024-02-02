@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # build onnxruntime by benjaminwan
 # CMakeFiles/onnxruntime.dir/link.txt/link/lib*.a
 
@@ -6,6 +6,8 @@ function collectLibs() {
   # shared lib
   cmake --build . --config Release --target install
   rm -r -f install/bin
+  mv install/include/onnxruntime/core/session/* install/include
+  rm -rf install/include/onnxruntime
   echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" > install/OnnxRuntimeConfig.cmake
   echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >> install/OnnxRuntimeConfig.cmake
   echo "link_directories(\${CMAKE_CURRENT_LIST_DIR}/lib)" >> install/OnnxRuntimeConfig.cmake
@@ -34,28 +36,11 @@ function collectLibs() {
 }
 
 function cmakeBuild() {
-  mkdir -p "build-$1"
-  pushd "build-$1"
+  mkdir -p "build-$sysOS"
+  pushd "build-$sysOS"
   cmake -DCMAKE_BUILD_TYPE=$1 \
-    -DCMAKE_CONFIGURATION_TYPES=$1 \
     -DCMAKE_INSTALL_PREFIX=install \
-    $(cat ../onnxruntime_cmake_options.txt) \
-    ../cmake
-  cmake --build . -j $NUM_THREADS
-  cmake --build . --target install
-  collectLibs
-  popd
-}
-
-function cmakeCrossBuild() {
-  mkdir -p "build-$1"
-  pushd "build-$1"
-  cmake -DCMAKE_C_FLAGS="-pthread" -DCMAKE_CXX_FLAGS="-pthread" \
-    -DCMAKE_TOOLCHAIN_FILE=../musl-cross.toolchain.cmake \
-    -DCMAKE_BUILD_TYPE=$1 \
-    -DCMAKE_CONFIGURATION_TYPES=$1 \
-    -DCMAKE_INSTALL_PREFIX=install \
-    $(cat ../onnxruntime_cmake_options.txt) \
+    $(cat ../onnxruntime_options-1.6.0.txt) \
     ../cmake
   cmake --build . -j $NUM_THREADS
   cmake --build . --target install
@@ -69,21 +54,20 @@ NUM_THREADS=1
 if [ $sysOS == "Darwin" ]; then
   #echo "I'm MacOS"
   NUM_THREADS=$(sysctl -n hw.ncpu)
-  cmakeBuild "Release"
 elif [ $sysOS == "Linux" ]; then
   #echo "I'm Linux"
-  NUM_THREADS=$(grep ^processor /proc/cpuinfo | wc -l)
-  if [ "$1" ] && [ "$2" ]; then
-    echo "TOOLCHAIN_NAME=$1"
-    echo "TOOLCHAIN_PATH=$2"
-    export TOOLCHAIN_NAME="$1"
-    export TOOLCHAIN_PATH="$2"
-    echo "cross build"
-    cmakeCrossBuild "Release"
-  else
-    echo "native build"
-    cmakeBuild "Release"
-  fi
+  NUM_THREADS=$(nproc)
 else
   echo "Other OS: $sysOS"
+  exit 0
 fi
+
+# 1st sync submodule
+# git submodule sync --recursive
+# git submodule update --init --recursive
+
+# 2nd patch source
+# cd ../onnxruntime
+# patch -p1 -i ../patchs/onnxruntime-1.6.0.patch
+
+cmakeBuild "Release"

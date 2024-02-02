@@ -20,8 +20,9 @@ jobs:
           - { arch: x86_64 , min: 21 }
 
     env:
-      ONNX_VERSION: v1.16.3
-      PKG_NAME_PREFIX: onnxruntime-1.16.3-${{ matrix.list.arch }}
+      ONNX_VERSION: v1.6.0
+      PKG_NAME_PREFIX: onnxruntime-1.6.0-${{ matrix.list.arch }}
+      BUILD_SCRIPT: build-onnxruntime-1.6.0-android.sh
 
     steps:
       # Setup JDK 11
@@ -50,23 +51,22 @@ jobs:
       # 复制编译脚本
       - name: copy build script
         run: |
-          cp build-onnxruntime-android.sh onnxruntime-${{ env.ONNX_VERSION }}
-          cp onnxruntime_cmake_options.txt onnxruntime-${{ env.ONNX_VERSION }}
+          cp ${{ env.BUILD_SCRIPT }} onnxruntime-${{ env.ONNX_VERSION }}
 
       # 编译
       - name: build
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
-          chmod a+x build-onnxruntime-android.sh
-          ./build-onnxruntime-android.sh ${{ matrix.list.arch }} ${{ matrix.list.min }} $ANDROID_NDK_HOME
+          chmod a+x ${{ env.BUILD_SCRIPT }}
+          ./${{ env.BUILD_SCRIPT }} ${{ matrix.list.arch }} ${{ matrix.list.min }}
 
       # 7z压缩
       - name: 7zip
         run: |
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-${{ matrix.list.arch }}/install ${{ matrix.list.arch }}
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-android-${{ matrix.list.arch }}/Release/install ${{ matrix.list.arch }}
           7z a ${{ env.PKG_NAME_PREFIX }}-shared.7z ${{ matrix.list.arch }}
           rm -r -f ${{ matrix.list.arch }}
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-${{ matrix.list.arch }}/install-static ${{ matrix.list.arch }}
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-android-${{ matrix.list.arch }}/Release/install-static ${{ matrix.list.arch }}
           7z a ${{ env.PKG_NAME_PREFIX }}-static.7z ${{ matrix.list.arch }}
           rm -r -f ${{ matrix.list.arch }}
 
@@ -89,8 +89,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ONNX_VERSION: v1.16.3
-      PKG_NAME: onnxruntime-1.16.3-android
+      ONNX_VERSION: v1.6.0
+      PKG_NAME: onnxruntime-1.6.0-android
 
     steps:
       # 检出代码
@@ -157,7 +157,6 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           prerelease: false
-          name: onnxruntime ${{ github.ref }}
           bodyFile: release.md
           artifacts: ${{ env.PKG_NAME }}-shared.7z,${{ env.PKG_NAME }}-static.7z
           allowUpdates: true

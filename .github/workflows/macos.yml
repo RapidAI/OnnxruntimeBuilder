@@ -11,16 +11,17 @@ jobs:
     runs-on: macos-latest
 
     env:
-      ONNX_VERSION: v1.16.3
-      SHARED_PKG_NAME: onnxruntime-1.16.3-macos-shared
-      STATIC_PKG_NAME: onnxruntime-1.16.3-macos-static
+      ONNX_VERSION: v1.6.0
+      SHARED_PKG_NAME: onnxruntime-1.6.0-macos-shared
+      STATIC_PKG_NAME: onnxruntime-1.6.0-macos-static
+      BUILD_SCRIPT: build-onnxruntime-1.6.0-python.sh
 
     steps:
-      # Setup JDK 11
-      - name: Set up JDK 11
+      # Setup JDK 8
+      - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          java-version: '8'
           distribution: 'adopt'
 
       # 检出代码
@@ -35,31 +36,25 @@ jobs:
           ref: ${{ env.ONNX_VERSION }}
           submodules: recursive
 
-      # 安装openmp
-      - name: install openmp
-        run: |
-          brew install libomp
-
       # 复制编译脚本
       - name: copy build script
         run: |
-          cp build-onnxruntime.sh onnxruntime-${{ env.ONNX_VERSION }}
-          cp onnxruntime_cmake_options.txt onnxruntime-${{ env.ONNX_VERSION }}
+          cp ${{ env.BUILD_SCRIPT }} onnxruntime-${{ env.ONNX_VERSION }}
 
       # 编译
       - name: build
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
-          chmod a+x build-onnxruntime.sh
-          ./build-onnxruntime.sh
+          chmod a+x ${{ env.BUILD_SCRIPT }}
+          ./${{ env.BUILD_SCRIPT }}
 
       # install文件夹改名macos，并使用7z压缩
       - name: 7z
         run: |
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Release/install macos
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Darwin/Release/install macos
           7z a ${{ env.SHARED_PKG_NAME }}.7z macos
           rm -r -f macos
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Release/install-static macos
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Darwin/Release/install-static macos
           7z a ${{ env.STATIC_PKG_NAME }}.7z macos
           rm -r -f macos
 

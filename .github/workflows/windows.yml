@@ -12,6 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         list:
+          - { win_ver: 2019, vs_name: vs2017, vs_ver: v141 }
+          - { win_ver: 2019, vs_name: vs2019, vs_ver: v142 }
           - { win_ver: 2022, vs_name: vs2022, vs_ver: v143 }
         crt:
           [
@@ -24,16 +26,18 @@ jobs:
     name: windows-${{ matrix.list.vs_name }}-${{ matrix.crt }}
 
     env:
-      ONNX_VERSION: v1.16.3
-      SHARED_PKG_NAME: onnxruntime-1.16.3-windows-${{ matrix.list.vs_name }}-shared-${{ matrix.crt }}
-      STATIC_PKG_NAME: onnxruntime-1.16.3-windows-${{ matrix.list.vs_name }}-static-${{ matrix.crt }}
+      ONNX_VERSION: v1.6.0
+      BUILD_SCRIPT: build-onnxruntime-1.6.0-cmake.bat
+      BUILD_OPTIONS: onnxruntime_options-1.6.0.txt
+      SHARED_PKG_NAME: onnxruntime-1.6.0-windows-${{ matrix.list.vs_name }}-shared-${{ matrix.crt }}
+      STATIC_PKG_NAME: onnxruntime-1.6.0-windows-${{ matrix.list.vs_name }}-static-${{ matrix.crt }}
 
     steps:
-      # Setup JDK 11
-      - name: Set up JDK 11
+      # Setup JDK 8
+      - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          java-version: '8'
           distribution: 'adopt'
 
       # 检出代码
@@ -51,14 +55,25 @@ jobs:
       # 复制编译脚本
       - name: copy build script
         run: |
-          cp build-onnxruntime.bat onnxruntime-${{ env.ONNX_VERSION }}
-          cp onnxruntime_cmake_options.txt onnxruntime-${{ env.ONNX_VERSION }}
+          cp ${{ env.BUILD_SCRIPT }} onnxruntime-${{ env.ONNX_VERSION }}
+          cp ${{ env.BUILD_OPTIONS }} onnxruntime-${{ env.ONNX_VERSION }}
+
+      - name: git submodule sync
+        run: |
+          cd onnxruntime-${{ env.ONNX_VERSION }}
+          git submodule sync --recursive
+          git submodule update --init --recursive
+
+      - name: patch source
+        run: |
+          cd onnxruntime-${{ env.ONNX_VERSION }}
+          git apply ../patchs/onnxruntime-1.6.0.patch
 
       # 编译
       - name: build
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
-          ./build-onnxruntime.bat ${{ matrix.list.vs_ver }} ${{ matrix.crt }}
+          ./${{ env.BUILD_SCRIPT }} ${{ matrix.list.vs_ver }} ${{ matrix.crt }}
 
       # install文件夹改名，并使用7z压缩
       - name: 7zip
@@ -136,7 +151,6 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           prerelease: false
-          name: onnxruntime ${{ github.ref }}
           bodyFile: release.md
           artifacts: artifacts/*/*.7z
           allowUpdates: true
