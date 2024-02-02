@@ -33,11 +33,12 @@ jobs:
       CMAKE_VERSION: 3.28.1
       PY_VERSION: 3.8.18
       JDK_VERSION: openjdk-8-jdk
-      GRADLE_VERSION: 6.9.4
+      GRADLE_VERSION: 6.1.1
       ONNX_VERSION: v1.6.0
       BUILD_SCRIPT: build-onnxruntime-1.6.0-python.sh
       SHARED_PKG_NAME: onnxruntime-1.6.0-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}-shared
       STATIC_PKG_NAME: onnxruntime-1.6.0-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}-static
+      JAVA_PKG_NAME: onnxruntime-1.6.0-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}-java
 
     steps:
       # 检出代码
@@ -112,21 +113,31 @@ jobs:
         run: |
           docker exec --env-file env.custom -w /root ${{ matrix.os_name }} add-apt-repository -y ppa:openjdk-r/ppa
           docker exec --env-file env.custom -w /root ${{ matrix.os_name }} apt-get update
-          docker exec --env-file env.custom -w /root ${{ matrix.os_name }} apt-get install ${{ env.JDK_VERSION }}
+          docker exec --env-file env.custom -w /root ${{ matrix.os_name }} apt-get -y install ${{ env.JDK_VERSION }}
           docker exec --env-file env.custom -w /root ${{ matrix.os_name }} java -version
+          JAVA_DIR=$(docker exec ${{ matrix.os_name }} readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+          echo "$JAVA_DIR"
+          echo "JAVA_HOME=$JAVA_DIR" >> env.custom
+          echo "JAVA_INCLUDE_PATH=$JAVA_DIR/include" >> env.custom
 
       - name: Docker - build
-        run: docker exec --env-file env.custom -w /root/onnxruntime-${{ env.ONNX_VERSION }} ${{ matrix.os_name }} ./${{ env.BUILD_SCRIPT }}
+        run: | 
+          docker exec --env-file env.custom -w /root ${{ matrix.os_name }} git config --global --add safe.directory "*"
+          docker exec --env-file env.custom -w /root/onnxruntime-${{ env.ONNX_VERSION }} ${{ matrix.os_name }} chmod a+x ${{ env.BUILD_SCRIPT }}
+          docker exec --env-file env.custom -w /root/onnxruntime-${{ env.ONNX_VERSION }} ${{ matrix.os_name }} ./${{ env.BUILD_SCRIPT }}
 
       # install文件夹改名linux，并使用7z压缩
       - name: 7zip
         run: |
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Linux/Release/install linux
+          cp -r onnxruntime-${{ env.ONNX_VERSION }}/build-Linux/Release/install linux
           7z a ${{ env.SHARED_PKG_NAME }}.7z linux
           rm -r -f linux
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Linux/Release/install-static linux
+          cp -r onnxruntime-${{ env.ONNX_VERSION }}/build-Linux/Release/install-static linux
           7z a ${{ env.STATIC_PKG_NAME }}.7z linux
           rm -r -f linux
+          cp -r onnxruntime-${{ env.ONNX_VERSION }}/build-Linux/Release/java/build ${{ env.JAVA_PKG_NAME }}
+          7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
+          rm -r -f java
 
       # 上传artifact
       - name: upload
@@ -141,6 +152,13 @@ jobs:
         with:
           name: ${{ env.STATIC_PKG_NAME }}
           path: ${{ env.STATIC_PKG_NAME }}.7z
+
+      # 上传artifact
+      - name: upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.JAVA_PKG_NAME }}
+          path: ${{ env.JAVA_PKG_NAME }}.7z
 
       # 获取所有的git log和tag
       - name: Unshallow
@@ -170,7 +188,7 @@ jobs:
         with:
           prerelease: false
           bodyFile: release.md
-          artifacts: ${{ env.SHARED_PKG_NAME }}.7z, ${{ env.STATIC_PKG_NAME }}.7z
+          artifacts: ${{ env.SHARED_PKG_NAME }}.7z, ${{ env.STATIC_PKG_NAME }}.7z, ${{ env.JAVA_PKG_NAME }}.7z
           allowUpdates: true
           artifactContentType: application/x-7z-compressed
           token: ${{ secrets.GITHUB_TOKEN }}

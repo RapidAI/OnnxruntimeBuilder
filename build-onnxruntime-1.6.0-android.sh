@@ -1,6 +1,7 @@
 #!/bin/bash
 # build onnxruntime by benjaminwan
 # CMakeFiles/onnxruntime.dir/link.txt/link/lib*.a
+# ANDROID_NDK_HOME=/path/android-sdk/ndk/22.1.7171670
 
 function collectLibs() {
   # shared lib
@@ -16,7 +17,8 @@ function collectLibs() {
   # static lib
   mkdir -p install-static/lib
   cp -r install/include install-static
-  link=$(cat CMakeFiles/onnxruntime.dir/link.txt)
+  all_link=$(cat CMakeFiles/onnxruntime.dir/link.txt)
+  link=${all_link#*onnxruntime.dir}
   regex="lib.*.a$"
   libs=""
   for var in $link; do

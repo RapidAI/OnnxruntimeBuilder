@@ -1,6 +1,15 @@
+diff -Nuarp onnxruntime/cmake/CMakeLists.txt onnxruntime-1.6.0-fix/cmake/CMakeLists.txt
+--- onnxruntime/cmake/CMakeLists.txt	2024-02-03 05:18:18.340065071 +0000
++++ onnxruntime-1.6.0-fix/cmake/CMakeLists.txt	2024-01-31 16:19:06.323435780 +0000
+@@ -1498,4 +1498,4 @@ if (WINDOWS_STORE)
+   endif()
+ endif()
+ 
+-include(flake8.cmake)
++#include(flake8.cmake)
 diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/logical/defs.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/logical/defs.cc
---- onnxruntime/cmake/external/onnx/onnx/defs/logical/defs.cc	2024-01-30 17:48:57.582868125 +0800
-+++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/logical/defs.cc	2024-01-30 11:40:51.000000000 +0800
+--- onnxruntime/cmake/external/onnx/onnx/defs/logical/defs.cc	2024-02-03 05:20:18.159509380 +0000
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/logical/defs.cc	2024-01-30 03:40:51.000000000 +0000
 @@ -18,7 +18,6 @@ inline void unaryLogicalOpInference(Infe
  std::function<void(OpSchema&)> BinaryLogicDocGenerator(const char* name) {
    return [=](OpSchema& schema) {
@@ -19,8 +28,8 @@ diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/logical/defs.cc onnxruntim
      schema.Input(
          0, 
 diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/logical/old.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/logical/old.cc
---- onnxruntime/cmake/external/onnx/onnx/defs/logical/old.cc	2024-01-30 17:48:57.582868125 +0800
-+++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/logical/old.cc	2024-01-30 11:41:07.000000000 +0800
+--- onnxruntime/cmake/external/onnx/onnx/defs/logical/old.cc	2024-02-03 05:20:18.159509380 +0000
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/logical/old.cc	2024-01-30 03:41:07.000000000 +0000
 @@ -10,7 +10,7 @@ namespace ONNX_NAMESPACE {
  std::function<void(OpSchema&)> BinaryLogicDocGenerator_opset12(const char* name) {
    return [=](OpSchema& schema) {
@@ -76,8 +85,8 @@ diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/logical/old.cc onnxruntime
      schema.Input(0, "A", "First input operand for the logical operator.", "T");
      schema.Input(1, "B", "Second input operand for the logical operator.", "T");
 diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/math/defs.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/math/defs.cc
---- onnxruntime/cmake/external/onnx/onnx/defs/math/defs.cc	2024-01-30 17:48:57.582868125 +0800
-+++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/math/defs.cc	2024-01-30 11:41:58.000000000 +0800
+--- onnxruntime/cmake/external/onnx/onnx/defs/math/defs.cc	2024-02-03 05:20:18.159509380 +0000
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/math/defs.cc	2024-01-30 03:41:58.000000000 +0000
 @@ -12,7 +12,6 @@ namespace ONNX_NAMESPACE {
  std::function<void(OpSchema&)> MathDocGenerator(const char* name) {
    return [=](OpSchema& schema) {
@@ -140,8 +149,8 @@ diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/math/defs.cc onnxruntime-1
      schema.Input(
          0,
 diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/math/old.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/math/old.cc
---- onnxruntime/cmake/external/onnx/onnx/defs/math/old.cc	2024-01-30 17:48:57.582868125 +0800
-+++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/math/old.cc	2024-01-30 11:42:40.000000000 +0800
+--- onnxruntime/cmake/external/onnx/onnx/defs/math/old.cc	2024-02-03 05:20:18.163509606 +0000
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/math/old.cc	2024-01-30 03:42:40.000000000 +0000
 @@ -12,7 +12,7 @@ namespace ONNX_NAMESPACE {
  std::function<void(OpSchema&)> MathDocGenerator_opset_7(const char* name) {
    return [=](OpSchema& schema) {
@@ -259,8 +268,8 @@ diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/math/old.cc onnxruntime-1.
      schema.Input(
          0,
 diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/nn/defs.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/nn/defs.cc
---- onnxruntime/cmake/external/onnx/onnx/defs/nn/defs.cc	2024-01-30 17:48:57.586867895 +0800
-+++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/nn/defs.cc	2024-01-30 11:43:09.000000000 +0800
+--- onnxruntime/cmake/external/onnx/onnx/defs/nn/defs.cc	2024-02-03 05:20:18.163509606 +0000
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/nn/defs.cc	2024-01-30 03:43:09.000000000 +0000
 @@ -207,7 +207,6 @@ std::function<void(OpSchema&)> PoolOpSch
      bool supports8bit = false) {
    return [=](OpSchema& schema) {
@@ -370,8 +379,8 @@ diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/nn/defs.cc onnxruntime-1.6
      schema.Attr(
          "p",
 diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/nn/old.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/nn/old.cc
---- onnxruntime/cmake/external/onnx/onnx/defs/nn/old.cc	2024-01-30 17:48:57.586867895 +0800
-+++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/nn/old.cc	2024-01-30 11:43:38.000000000 +0800
+--- onnxruntime/cmake/external/onnx/onnx/defs/nn/old.cc	2024-02-03 05:20:18.163509606 +0000
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/nn/old.cc	2024-01-30 03:43:38.000000000 +0000
 @@ -430,7 +430,6 @@ std::function<void(OpSchema&)> PoolOpSch
      const char* additionalDescription) {
    return [=](OpSchema& schema) {
@@ -454,8 +463,8 @@ diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/nn/old.cc onnxruntime-1.6.
      schema.Input(
          0,
 diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/reduction/defs.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/reduction/defs.cc
---- onnxruntime/cmake/external/onnx/onnx/defs/reduction/defs.cc	2024-01-30 17:48:57.590867665 +0800
-+++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/reduction/defs.cc	2024-01-30 11:43:56.000000000 +0800
+--- onnxruntime/cmake/external/onnx/onnx/defs/reduction/defs.cc	2024-02-03 05:20:18.167509832 +0000
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/reduction/defs.cc	2024-01-30 03:43:56.000000000 +0000
 @@ -27,14 +27,14 @@ std::function<void(OpSchema&)> ReduceDoc
      bool axes_input = false) {
    return [=](OpSchema& schema) {
@@ -492,8 +501,8 @@ diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/reduction/defs.cc onnxrunt
      schema.Attr(
          "axis",
 diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/reduction/old.cc onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/reduction/old.cc
---- onnxruntime/cmake/external/onnx/onnx/defs/reduction/old.cc	2024-01-30 17:48:57.590867665 +0800
-+++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/reduction/old.cc	2024-01-30 11:44:09.000000000 +0800
+--- onnxruntime/cmake/external/onnx/onnx/defs/reduction/old.cc	2024-02-03 05:20:18.167509832 +0000
++++ onnxruntime-1.6.0-fix/cmake/external/onnx/onnx/defs/reduction/old.cc	2024-01-30 03:44:09.000000000 +0000
 @@ -25,14 +25,14 @@ std::function<void(OpSchema&)> ReduceDoc
      bool supports_8bit_datatypes = false) {
    return [=](OpSchema& schema) {
@@ -561,11 +570,57 @@ diff -Nuarp onnxruntime/cmake/external/onnx/onnx/defs/reduction/old.cc onnxrunti
      schema.SetDoc(doc.c_str());
      schema.Attr(
          "axis",
---- onnxruntime/cmake/CMakeLists.txt	2024-01-30 18:06:56.948107801 +0800
-+++ onnxruntime-1.6.0-fix/cmake/CMakeLists.txt	2024-02-01 00:19:06.323435780 +0800
-@@ -1498,4 +1498,4 @@ if (WINDOWS_STORE)
-   endif()
- endif()
+diff -Nuarp onnxruntime/cmake/onnxruntime_java.cmake onnxruntime-1.6.0-fix/cmake/onnxruntime_java.cmake
+--- onnxruntime/cmake/onnxruntime_java.cmake	2024-02-03 05:18:18.348065617 +0000
++++ onnxruntime-1.6.0-fix/cmake/onnxruntime_java.cmake	2024-02-03 05:13:08.055487991 +0000
+@@ -106,6 +106,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android"
+   set(JNI_ARCH ${ANDROID_ABI})
+ elseif (ARM64)
+   set(JNI_ARCH aarch64)
++elseif (ARM)
++  set(JNI_ARCH arm)
+ elseif (X86_64)
+   set(JNI_ARCH x64)
+ elseif (POWER)
+diff -Nuarp onnxruntime/java/build.gradle onnxruntime-1.6.0-fix/java/build.gradle
+--- onnxruntime/java/build.gradle	2024-02-03 05:16:08.706218866 +0000
++++ onnxruntime-1.6.0-fix/java/build.gradle	2024-02-03 03:19:02.000000000 +0000
+@@ -3,7 +3,6 @@ plugins {
+ 	id 'maven-publish'
+ 	id 'signing'
+ 	id 'jacoco'
+-	id 'com.diffplug.gradle.spotless' version '3.26.0'
+ }
  
--include(flake8.cmake)
-+#include(flake8.cmake)
+ allprojects {
+@@ -63,18 +62,6 @@ wrapper {
+ 	gradleVersion = '6.1.1'
+ }
+ 
+-spotless {
+-	java {
+-		removeUnusedImports()
+-		googleJavaFormat()
+-	}
+-	format 'gradle', {
+-		target '**/*.gradle'
+-		trimTrailingWhitespace()
+-		indentWithTabs()
+-	}
+-}
+-
+ compileJava {
+ 	options.compilerArgs += ["-h", "${project.buildDir}/headers/"]
+ }
+diff -Nuarp onnxruntime/java/src/main/java/ai/onnxruntime/OnnxRuntime.java onnxruntime-1.6.0-fix/java/src/main/java/ai/onnxruntime/OnnxRuntime.java
+--- onnxruntime/java/src/main/java/ai/onnxruntime/OnnxRuntime.java	2024-01-30 09:43:33.105354898 +0000
++++ onnxruntime-1.6.0-fix/java/src/main/java/ai/onnxruntime/OnnxRuntime.java	2024-02-03 05:14:09.011544192 +0000
+@@ -66,6 +66,8 @@ final class OnnxRuntime {
+       detectedArch = "x86";
+     } else if (arch.startsWith("aarch64")) {
+       detectedArch = "aarch64";
++    } else if (arch.startsWith("arm")) {
++      detectedArch = "arm";
+     } else if (arch.startsWith("ppc64")) {
+       detectedArch = "ppc64";
+     } else if (isAndroid()) {

@@ -32,9 +32,17 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
+      # install ndk
+      - name: install ndk 22.1.7171670
+        run: |
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;22.1.7171670"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/22.1.7171670" >> $GITHUB_ENV
+
       # 删除ndk -g参数
       - name: ndk del -g
-        run: sed -i -e '/^  -g$/d' $ANDROID_NDK_HOME/build/cmake/android-legacy.toolchain.cmake
+        run: |
+          echo $ANDROID_NDK_HOME
+          sed -i -e '/^  -g$/d' $ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake
 
       # 检出代码
       - uses: actions/checkout@v3

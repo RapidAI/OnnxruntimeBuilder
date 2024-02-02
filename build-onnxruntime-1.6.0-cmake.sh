@@ -16,7 +16,8 @@ function collectLibs() {
   # static lib
   mkdir -p install-static/lib
   cp -r install/include install-static
-  link=$(cat CMakeFiles/onnxruntime.dir/link.txt)
+  all_link=$(cat CMakeFiles/onnxruntime.dir/link.txt)
+  link=${all_link#*onnxruntime.dir}
   regex="lib.*.a$"
   libs=""
   for var in $link; do
