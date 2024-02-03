@@ -12,9 +12,10 @@ jobs:
 
     env:
       ONNX_VERSION: v1.15.1
+      BUILD_SCRIPT: build-onnxruntime.sh
       SHARED_PKG_NAME: onnxruntime-1.15.1-macos11-shared
       STATIC_PKG_NAME: onnxruntime-1.15.1-macos11-static
-      BUILD_SCRIPT: build-onnxruntime.sh
+      JAVA_PKG_NAME: onnxruntime-1.15.1-macos11-java
 
     steps:
       # Setup JDK 8
@@ -56,12 +57,15 @@ jobs:
       # install文件夹改名macos，并使用7z压缩
       - name: 7z
         run: |
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Darwin/Release/install macos
+          cp -r onnxruntime-${{ env.ONNX_VERSION }}/build-Darwin/Release/install macos
           7z a ${{ env.SHARED_PKG_NAME }}.7z macos
           rm -r -f macos
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Darwin/Release/install-static macos
+          cp -r onnxruntime-${{ env.ONNX_VERSION }}/build-Darwin/Release/install-static macos
           7z a ${{ env.STATIC_PKG_NAME }}.7z macos
           rm -r -f macos
+          cp -r onnxruntime-${{ env.ONNX_VERSION }}/build-Darwin/Release/java/build ${{ env.JAVA_PKG_NAME }}
+          7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
+          rm -r -f java
 
       # 上传artifact
       - name: upload
@@ -75,6 +79,12 @@ jobs:
         with:
           name: ${{ env.STATIC_PKG_NAME }}
           path: ${{ env.STATIC_PKG_NAME }}.7z
+
+      - name: upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.JAVA_PKG_NAME }}
+          path: ${{ env.JAVA_PKG_NAME }}.7z
 
       # 获取所有的git log和tag
       - name: Unshallow
@@ -103,9 +113,8 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           prerelease: false
-          name: onnxruntime ${{ github.ref }}
           bodyFile: release.md
-          artifacts: ${{ env.SHARED_PKG_NAME }}.7z, ${{ env.STATIC_PKG_NAME }}.7z
+          artifacts: ${{ env.SHARED_PKG_NAME }}.7z, ${{ env.STATIC_PKG_NAME }}.7z, ${{ env.JAVA_PKG_NAME }}.7z
           allowUpdates: true
           artifactContentType: application/x-7z-compressed
           token: ${{ secrets.GITHUB_TOKEN }}

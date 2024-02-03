@@ -65,22 +65,22 @@ jobs:
       - name: build
         run: |
           cd onnxruntime-${{ env.ONNX_VERSION }}
-          ./${{ env.BUILD_SCRIPT }} ${{ matrix.crt }}
+          ./${{ env.BUILD_SCRIPT }} ${{ matrix.list.vs_ver }} ${{ matrix.crt }}
 
       # install文件夹改名，并使用7z压缩
       - name: 7zip
         run: |
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64-${{ matrix.crt }}/Release/install windows-x64
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Win32-${{ matrix.crt }}/Release/install windows-x86
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install windows-x64
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Win32-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install windows-x86
           7z a ${{ env.SHARED_PKG_NAME }}.7z windows-x64 windows-x86
           rm windows-x64 -r -fo
           rm windows-x86 -r -fo
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64-${{ matrix.crt }}/Release/install-static windows-x64
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Win32-${{ matrix.crt }}/Release/install-static windows-x86
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install-static windows-x64
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-Win32-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install-static windows-x86
           7z a ${{ env.STATIC_PKG_NAME }}.7z windows-x64 windows-x86
           rm windows-x64 -r -fo
           rm windows-x86 -r -fo
-          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64-${{ matrix.crt }}/Release/java/build ${{ env.JAVA_PKG_NAME }}
+          mv onnxruntime-${{ env.ONNX_VERSION }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/java/build ${{ env.JAVA_PKG_NAME }}
           7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
 
       # 上传artifact

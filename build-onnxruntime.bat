@@ -1,21 +1,31 @@
-:: build onnxruntime for windows by benjaminwan
+:: build onnxruntime 1.15.1 for windows by benjaminwan
 :: x64 build_java, x86 Java is currently not supported on 32-bit x86 architecture
+
 @ECHO OFF
 chcp 65001
 cls
 SETLOCAL EnableDelayedExpansion
 
 IF "%1"=="" (
+    echo input VS_VER none, use v142
+	set VS_VER="v142"
+)^
+ELSE (
+	echo input VS_VER:%1
+    set VS_VER="%1"
+)
+
+IF "%2"=="" (
     echo input CRT none, use mt
 	set CRT="mt"
 )^
 ELSE (
-	echo input CRT:%1
-    set CRT="%1"
+	echo input CRT:%2
+    set CRT="%2"
 )
 
-call :cmakeParams "x64" %CRT%
-call :cmakeParams "Win32" %CRT%
+call :cmakeParams "x64" %VS_VER% %CRT%
+call :cmakeParams "Win32" %VS_VER% %CRT%
 GOTO:EOF
 
 :getFileName
@@ -64,13 +74,19 @@ if "%~1" == "Win32" (
 else (
     set MACHINE_FLAG="--build_java"
 )
-if "%~2" == "mt" (
+if "%~2" == "v142" (
+    set VS_FLAG=--cmake_generator "Visual Studio 16 2019"
+)^
+else (
+    set VS_FLAG=--cmake_generator "Visual Studio 17 2022"
+)
+if "%~3" == "mt" (
     set STATIC_CRT_FLAG="--enable_msvc_static_runtime"
 )^
 else (
     set STATIC_CRT_FLAG=
 )
-python %~dp0\tools\ci_build\build.py --build_dir %~dp0\build-%~1-%~2 ^
+python %~dp0\tools\ci_build\build.py --build_dir %~dp0\build-%~1-%~2-%~3 ^
     --config Release ^
 	--update ^
 	--parallel ^
@@ -78,8 +94,9 @@ python %~dp0\tools\ci_build\build.py --build_dir %~dp0\build-%~1-%~2 ^
 	--build_shared_lib ^
 	%STATIC_CRT_FLAG% ^
 	%MACHINE_FLAG% ^
+	%VS_FLAG% ^
 	--cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF
-pushd "build-%~1-%~2"\Release
+pushd "build-%~1-%~2-%~3"\Release
 call :collectLibs
 popd
 GOTO:EOF
