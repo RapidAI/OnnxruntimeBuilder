@@ -8,13 +8,13 @@ on:
 
 jobs:
   macos:
-    runs-on: macos-11
+    runs-on: macos-latest
 
     env:
-      ONNX_VERSION: v1.15.1
-      SHARED_PKG_NAME: onnxruntime-1.15.1-macos11-shared
-      STATIC_PKG_NAME: onnxruntime-1.15.1-macos11-static
-      BUILD_SCRIPT: build-onnxruntime.sh
+      ONNX_VERSION: v1.6.0
+      SHARED_PKG_NAME: onnxruntime-1.6.0-macos-shared
+      STATIC_PKG_NAME: onnxruntime-1.6.0-macos-static
+      BUILD_SCRIPT: build-onnxruntime-1.6.0-python.sh
 
     steps:
       # Setup JDK 8
@@ -24,10 +24,10 @@ jobs:
           java-version: '8'
           distribution: 'adopt'
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Python 3.8.5
+        uses: actions/setup-python@v3
         with:
-          python-version: '3.8.18'
+          python-version: 3.8.5
 
       # 检出代码
       - uses: actions/checkout@v3

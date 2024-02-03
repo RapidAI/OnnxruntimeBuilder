@@ -20,9 +20,9 @@ jobs:
           - { arch: x86_64 , min: 21 }
 
     env:
-      ONNX_VERSION: v1.15.1
-      PKG_NAME_PREFIX: onnxruntime-1.15.1-${{ matrix.list.arch }}
-      BUILD_SCRIPT: build-onnxruntime-android.sh
+      ONNX_VERSION: v1.6.0
+      PKG_NAME_PREFIX: onnxruntime-1.6.0-${{ matrix.list.arch }}
+      BUILD_SCRIPT: build-onnxruntime-1.6.0-android.sh
 
     steps:
       # Setup JDK 11
@@ -31,11 +31,6 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.8.18'
 
       # install ndk
       - name: install ndk 22.1.7171670
@@ -102,8 +97,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ONNX_VERSION: v1.15.1
-      PKG_NAME: onnxruntime-1.15.1-android
+      ONNX_VERSION: v1.6.0
+      PKG_NAME: onnxruntime-1.6.0-android
 
     steps:
       # 检出代码

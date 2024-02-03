@@ -15,11 +15,14 @@ jobs:
       matrix:
         os_name: [ubuntu]
         list:
+          - { os_ver: 14.04, os_id: trusty }
+          - { os_ver: 16.04, os_id: xenial }
           - { os_ver: 18.04, os_id: bionic }
           - { os_ver: 20.04, os_id: focal }
         arch:
           [
             amd64,
+            arm,
             arm64,
             ppc64le,
           ]
@@ -30,12 +33,12 @@ jobs:
       CMAKE_VERSION: 3.28.1
       PY_VERSION: 3.8.18
       JDK_VERSION: openjdk-8-jdk
-      GRADLE_VERSION: 8.5
-      ONNX_VERSION: v1.15.1
-      BUILD_SCRIPT: build-onnxruntime.sh
-      SHARED_PKG_NAME: onnxruntime-1.15.1-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}-shared
-      STATIC_PKG_NAME: onnxruntime-1.15.1-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}-static
-      JAVA_PKG_NAME: onnxruntime-1.15.1-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}-java
+      GRADLE_VERSION: 6.1.1
+      ONNX_VERSION: v1.6.0
+      BUILD_SCRIPT: build-onnxruntime-1.6.0-python.sh
+      SHARED_PKG_NAME: onnxruntime-1.6.0-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}-shared
+      STATIC_PKG_NAME: onnxruntime-1.6.0-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}-static
+      JAVA_PKG_NAME: onnxruntime-1.6.0-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}-java
 
     steps:
       # 检出代码
@@ -55,6 +58,17 @@ jobs:
         run: |
           cp ${{ env.BUILD_SCRIPT }} onnxruntime-${{ env.ONNX_VERSION }}
           chmod a+x ${{ env.BUILD_SCRIPT }}
+
+      - name: git submodule sync
+        run: |
+          cd onnxruntime-${{ env.ONNX_VERSION }}
+          git submodule sync --recursive
+          git submodule update --init --recursive
+
+      - name: patch source
+        run: |
+          cd onnxruntime-${{ env.ONNX_VERSION }}
+          patch -p1 -i ../patchs/onnxruntime-1.6.0.patch
 
       - name: Host - update
         run: sudo apt-get update
