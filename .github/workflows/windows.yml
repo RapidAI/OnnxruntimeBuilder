@@ -80,7 +80,7 @@ jobs:
           7z a ${{ env.STATIC_PKG_NAME }}.7z windows-x64 windows-x86
           rm windows-x64 -r -fo
           rm windows-x86 -r -fo
-          mv onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/java/build ${{ env.JAVA_PKG_NAME }}
+          mv onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
           7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
 
       # 上传artifact

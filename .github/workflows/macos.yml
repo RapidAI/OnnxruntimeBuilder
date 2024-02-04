@@ -16,7 +16,7 @@ jobs:
           - { onnx: v1.16.3 }
         list:
           - { os_ver: 11 }
-          - { os_ver: 13-arm64 }
+          - { os_ver: 14-arm64 }
 
     runs-on: macos-${{ matrix.list.os_ver }}
 
@@ -72,9 +72,8 @@ jobs:
           cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin/Release/install-static macos
           7z a ${{ env.STATIC_PKG_NAME }}.7z macos
           rm -r -f macos
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin/Release/java/build ${{ env.JAVA_PKG_NAME }}
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
           7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
-          rm -r -f java
 
       # 上传artifact
       - name: upload

@@ -117,9 +117,8 @@ jobs:
           cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/install-static linux
           7z a ${{ env.STATIC_PKG_NAME }}.7z linux
           rm -r -f linux
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/java/build ${{ env.JAVA_PKG_NAME }}
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
           7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
-          rm -r -f java
 
       # 上传artifact
       - name: upload
