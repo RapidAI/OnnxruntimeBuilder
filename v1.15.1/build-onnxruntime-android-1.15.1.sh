@@ -6,8 +6,8 @@
 function collectLibs() {
   # shared lib
   cmake --build . --config Release --target install
-#  rm -r -f install/bin
-  mv install/include/onnxruntime/* install/include
+  rm -r -f install/bin
+  mv install/include/onnxruntime/core/session/* install/include
   rm -rf install/include/onnxruntime
   echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" > install/OnnxRuntimeConfig.cmake
   echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >> install/OnnxRuntimeConfig.cmake
@@ -46,7 +46,6 @@ function pyBuild() {
     --parallel \
     --skip_tests \
     --build_shared_lib \
-    --build_java \
     --android \
     --android_abi $1 \
     --android_api $2 \

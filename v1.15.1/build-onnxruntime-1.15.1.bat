@@ -1,5 +1,6 @@
-:: build onnxruntime for windows by benjaminwan
+:: build onnxruntime 1.15.1 for windows by benjaminwan
 :: x64 build_java, x86 Java is currently not supported on 32-bit x86 architecture
+
 @ECHO OFF
 chcp 65001
 cls
@@ -41,8 +42,8 @@ GOTO:EOF
 
 :collectLibs
 cmake --build . --config Release --target install
-::del /s/q install\*test*.exe
-copy install\include\onnxruntime\* install\include
+del /s/q install\*test*.exe
+copy install\include\onnxruntime\core\session\* install\include
 rd /S /Q install\include\onnxruntime
 echo set(OnnxRuntime_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include") > install/OnnxRuntimeConfig.cmake
 echo include_directories(${OnnxRuntime_INCLUDE_DIRS}) >> install/OnnxRuntimeConfig.cmake
@@ -73,7 +74,7 @@ if "%~1" == "Win32" (
 else (
     set MACHINE_FLAG="--build_java"
 )
-if "%~2" == "v141" (
+if "%~2" == "v142" (
     set VS_FLAG=--cmake_generator "Visual Studio 16 2019"
 )^
 else (
