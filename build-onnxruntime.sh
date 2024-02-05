@@ -39,11 +39,12 @@ function collectLibs() {
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 sysOS=$(uname -s)
+NUM_THREADS=1
 
 if [ $sysOS == "Darwin" ]; then
-  echo "I'm MacOS"
+  NUM_THREADS=$(sysctl -n hw.ncpu)
 elif [ $sysOS == "Linux" ]; then
-  echo "I'm Linux"
+  NUM_THREADS=$(nproc)
 else
   echo "Other OS: $sysOS"
   exit 0
@@ -53,7 +54,6 @@ fi
 python3 $DIR/tools/ci_build/build.py --build_dir $DIR/build-$sysOS \
     --allow_running_as_root \
     --config Release \
-    --build \
     --parallel \
     --skip_tests \
     --build_shared_lib \
@@ -61,5 +61,6 @@ python3 $DIR/tools/ci_build/build.py --build_dir $DIR/build-$sysOS \
     --cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF
 
 pushd build-$sysOS/Release
+cmake --build . --config Release -j $NUM_THREADS
 collectLibs
 popd

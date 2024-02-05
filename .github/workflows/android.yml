@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.17.0, ndk: 22.1.7171670 }
+          - { onnx: v1.17.0, ndk: 26.1.10909125 }
         list:
           - { arch: armeabi-v7a, min: 19 }
           - { arch: arm64-v8a, min: 21 }

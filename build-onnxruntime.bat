@@ -87,7 +87,6 @@ else (
 )
 python %~dp0\tools\ci_build\build.py --build_dir %~dp0\build-%~1-%~2-%~3 ^
     --config Release ^
-	--build ^
 	--parallel ^
 	--skip_tests ^
 	--build_shared_lib ^
@@ -96,6 +95,7 @@ python %~dp0\tools\ci_build\build.py --build_dir %~dp0\build-%~1-%~2-%~3 ^
 	%VS_FLAG% ^
 	--cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF
 pushd "build-%~1-%~2-%~3"\Release
+cmake --build . --config Release -j %NUMBER_OF_PROCESSORS%
 call :collectLibs
 popd
 GOTO:EOF
