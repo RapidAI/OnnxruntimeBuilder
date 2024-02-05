@@ -87,7 +87,7 @@ else (
 )
 python %~dp0\tools\ci_build\build.py --build_dir %~dp0\build-%~1-%~2-%~3 ^
     --config Release ^
-	--update ^
+	--build ^
 	--parallel ^
 	--skip_tests ^
 	--build_shared_lib ^

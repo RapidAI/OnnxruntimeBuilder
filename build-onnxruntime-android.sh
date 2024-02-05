@@ -43,6 +43,7 @@ function pyBuild() {
   echo ANDROID_NDK_HOME=$ANDROID_NDK_HOME
   python3 $DIR/tools/ci_build/build.py --build_dir $DIR/build-android-$1 \
     --config Release \
+    --build \
     --parallel \
     --skip_tests \
     --build_shared_lib \

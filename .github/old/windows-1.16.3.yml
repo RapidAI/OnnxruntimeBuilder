@@ -1,4 +1,4 @@
-name: macos
+name: windows
 
 on:
   workflow_dispatch:
@@ -7,23 +7,29 @@ on:
       - '*'
 
 jobs:
-  macos:
-
+  windows:
     strategy:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.17.0 }
+          - { onnx: v1.16.3 }
         list:
-          - { os_ver: 11 }
+          - { win_ver: 2022, vs_name: vs2022, vs_ver: v143 }
+        crt:
+          [
+            md,
+            mt,
+          ]
 
-    runs-on: macos-${{ matrix.list.os_ver }}
+    runs-on: windows-${{ matrix.list.win_ver }}
+
+    name: windows-${{ matrix.list.vs_name }}-${{ matrix.crt }}
 
     env:
-      BUILD_SCRIPT: build-onnxruntime.sh
-      SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-shared
-      STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-static
-      JAVA_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-java
+      BUILD_SCRIPT: build-onnxruntime.bat
+      SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-windows-${{ matrix.list.vs_name }}-shared-${{ matrix.crt }}
+      STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-windows-${{ matrix.list.vs_name }}-static-${{ matrix.crt }}
+      JAVA_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-windows-${{ matrix.list.vs_name }}-java-${{ matrix.crt }}
 
     steps:
       # Setup JDK 8
@@ -36,7 +42,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.8.18'
+          python-version: '3.8.10'
 
       # 检出代码
       - uses: actions/checkout@v3
@@ -59,19 +65,22 @@ jobs:
       - name: build
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
-          chmod a+x ${{ env.BUILD_SCRIPT }}
-          ./${{ env.BUILD_SCRIPT }}
+          ./${{ env.BUILD_SCRIPT }} ${{ matrix.list.vs_ver }} ${{ matrix.crt }}
 
-      # install文件夹改名macos，并使用7z压缩
-      - name: 7z
+      # install文件夹改名，并使用7z压缩
+      - name: 7zip
         run: |
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin/Release/install macos
-          7z a ${{ env.SHARED_PKG_NAME }}.7z macos
-          rm -r -f macos
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin/Release/install-static macos
-          7z a ${{ env.STATIC_PKG_NAME }}.7z macos
-          rm -r -f macos
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
+          mv onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install windows-x64
+          mv onnxruntime-${{ matrix.ver.onnx }}/build-Win32-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install windows-x86
+          7z a ${{ env.SHARED_PKG_NAME }}.7z windows-x64 windows-x86
+          rm windows-x64 -r -fo
+          rm windows-x86 -r -fo
+          mv onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install-static windows-x64
+          mv onnxruntime-${{ matrix.ver.onnx }}/build-Win32-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install-static windows-x86
+          7z a ${{ env.STATIC_PKG_NAME }}.7z windows-x64 windows-x86
+          rm windows-x64 -r -fo
+          rm windows-x86 -r -fo
+          mv onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
           7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
 
       # 上传artifact
@@ -88,10 +97,19 @@ jobs:
           path: ${{ env.STATIC_PKG_NAME }}.7z
 
       - name: upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.JAVA_PKG_NAME }}
           path: ${{ env.JAVA_PKG_NAME }}.7z
+
+  release:
+    needs: [ windows ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # 检出代码
+      - uses: actions/checkout@v3
 
       # 获取所有的git log和tag
       - name: Unshallow
@@ -114,14 +132,25 @@ jobs:
         run: |
           echo -e '${{ env.log_state }}' > release.md
 
+      # 下载artifact
+      - name: download
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      # 查看artifact
+      - name: list artifact
+        run: |
+          tree artifacts
+
       # 创建release 上传release
       # https://github.com/marketplace/actions/create-release
-      - name: Create release and upload-archive
+      - name: upload-windows
         uses: ncipollo/release-action@v1
         with:
           prerelease: false
           bodyFile: release.md
-          artifacts: ${{ env.SHARED_PKG_NAME }}.7z, ${{ env.STATIC_PKG_NAME }}.7z, ${{ env.JAVA_PKG_NAME }}.7z
+          artifacts: artifacts/*/*.7z
           allowUpdates: true
           artifactContentType: application/x-7z-compressed
           token: ${{ secrets.GITHUB_TOKEN }}
