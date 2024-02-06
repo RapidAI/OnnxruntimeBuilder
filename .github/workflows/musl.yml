@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.16.3, musl: 20240108 }
+          - { onnx: v1.17.0, musl: 20240108 }
         arch:
           [
             aarch64-linux-musl,
