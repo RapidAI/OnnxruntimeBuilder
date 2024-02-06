@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.17.0, musl: 20240108 }
+          - { onnx: v1.17.0, musl: 12.2.0 }
         arch:
           [
             aarch64-linux-musl,
@@ -81,7 +81,7 @@ jobs:
       # 部署musl
       - name: deploy musl
         run: |
-          wget https://github.com/benjaminwan/musl-cross-builder/releases/download/${{ matrix.ver.musl }}/${{ matrix.arch }}.7z -O ${{ matrix.arch }}.7z
+          wget https://github.com/benjaminwan/musl-cross-builder/releases/download/${{ matrix.ver.musl }}/${{ matrix.arch }}-${{ matrix.ver.musl }}.7z -O ${{ matrix.arch }}.7z
           7z x ${{ matrix.arch }}.7z -aoa
           mv ${{ matrix.arch }}/ /opt/${{ matrix.arch }}/
 
