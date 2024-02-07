@@ -34,41 +34,32 @@ function collectLibs() {
   echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >> install-static/OnnxRuntimeConfig.cmake
   echo "link_directories(\${CMAKE_CURRENT_LIST_DIR}/lib)" >> install-static/OnnxRuntimeConfig.cmake
   echo "set(OnnxRuntime_LIBS $libs)" >> install-static/OnnxRuntimeConfig.cmake
+  cp CMakeFiles/onnxruntime.dir/link.txt install-static/link.log
 }
 
-function cmakeBuild() {
-  mkdir -p "build-$sysOS"
-  pushd "build-$sysOS"
-  cmake -DCMAKE_BUILD_TYPE=$1 \
-    -DCMAKE_INSTALL_PREFIX=install \
-    $(cat ../onnxruntime_options-1.6.0.txt) \
-    ../cmake
-  cmake --build . -j $NUM_THREADS
-  cmake --build . --target install
-  collectLibs
-  popd
-}
-
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 sysOS=$(uname -s)
 NUM_THREADS=1
 
 if [ $sysOS == "Darwin" ]; then
-  #echo "I'm MacOS"
   NUM_THREADS=$(sysctl -n hw.ncpu)
 elif [ $sysOS == "Linux" ]; then
-  #echo "I'm Linux"
   NUM_THREADS=$(nproc)
 else
   echo "Other OS: $sysOS"
   exit 0
 fi
 
-# 1st sync submodule
-# git submodule sync --recursive
-# git submodule update --init --recursive
 
-# 2nd patch source
-# cd ../onnxruntime
-# patch -p1 -i ../patchs/onnxruntime-1.6.0.patch
+python3 $DIR/tools/ci_build/build.py --build_dir $DIR/build-$sysOS \
+    --config Release \
+    --parallel \
+    --skip_tests \
+    --build_shared_lib \
+    --build_java \
+    --cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF onnxruntime_RUN_ONNX_TESTS=OFF onnxruntime_BUILD_WINML_TESTS=OFF onnxruntime_USE_OPENMP=OFF onnxruntime_DEV_MODE=OFF
 
-cmakeBuild "Release"
+pushd build-$sysOS/Release
+cmake --build . --config Release -j $NUM_THREADS
+collectLibs
+popd

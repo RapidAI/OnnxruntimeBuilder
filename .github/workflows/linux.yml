@@ -15,21 +15,25 @@ jobs:
       matrix:
         os_name: [ubuntu]
         ver:
-          - { onnx: v1.17.0, cmake: 3.28.2, python: 3.8.18, gradle: 8.5, jdk: openjdk-8-jdk }
+          - { onnx: v1.6.0, cmake: 3.28.2, python: 3.8.18, gradle: 6.1.1, jdk: openjdk-8-jdk }
         list:
+          - { os_ver: 14.04, os_id: trusty }
+          - { os_ver: 16.04, os_id: xenial }
+          - { os_ver: 18.04, os_id: bionic }
           - { os_ver: 20.04, os_id: focal }
           - { os_ver: 22.04, os_id: jammy }
         arch:
           [
             amd64,
+            arm,
             arm64,
             ppc64le,
           ]
 
-    name: ubuntu-${{ matrix.list.os_ver }}-${{ matrix.arch }}
+    name: ${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}
 
     env:
-      BUILD_SCRIPT: build-onnxruntime.sh
+      BUILD_SCRIPT: build-onnxruntime-${{ matrix.ver.onnx }}.sh
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-ubuntu-${{ matrix.list.os_ver }}-${{ matrix.arch }}-shared
       STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-ubuntu-${{ matrix.list.os_ver }}-${{ matrix.arch }}-static
       JAVA_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-ubuntu-${{ matrix.list.os_ver }}-${{ matrix.arch }}-java
@@ -46,6 +50,17 @@ jobs:
           path: onnxruntime-${{ matrix.ver.onnx }}
           ref: ${{ matrix.ver.onnx }}
           submodules: recursive
+
+      - name: git submodule sync
+        run: |
+          cd onnxruntime-${{ matrix.ver.onnx }}
+          git submodule sync --recursive
+          git submodule update --init --recursive
+
+      - name: patch source
+        run: |
+          cd onnxruntime-${{ matrix.ver.onnx }}
+          patch -p1 -i ../patchs/onnxruntime-1.6.0.patch
 
       # 复制
       - name: copy

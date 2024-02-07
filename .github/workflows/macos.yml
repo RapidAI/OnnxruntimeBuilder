@@ -13,30 +13,36 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.17.0 }
+          - { onnx: v1.6.0, gradle: 6.1.1 }
         list:
           - { os_ver: 11 }
 
     runs-on: macos-${{ matrix.list.os_ver }}
 
     env:
-      BUILD_SCRIPT: build-onnxruntime.sh
+      BUILD_SCRIPT: build-onnxruntime-${{ matrix.ver.onnx }}.sh
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-shared
       STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-static
       JAVA_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-java
 
     steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8.18'
+
+      - name: deploy gradle
+        run: |
+          wget https://services.gradle.org/distributions/gradle-${{ matrix.ver.gradle }}-bin.zip -O gradle-${{ matrix.ver.gradle }}-bin.zip
+          7z x gradle-${{ matrix.ver.gradle }}-bin.zip -aoa
+          echo "PATH=${{ github.workspace }}/gradle-${{ matrix.ver.gradle }}/bin:$PATH" >> $GITHUB_ENV
+
       # Setup JDK 8
       - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
           java-version: '8'
           distribution: 'adopt'
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.8.18'
 
       # 检出代码
       - uses: actions/checkout@v3
@@ -49,6 +55,17 @@ jobs:
           path: onnxruntime-${{ matrix.ver.onnx }}
           ref: ${{ matrix.ver.onnx }}
           submodules: recursive
+
+      - name: git submodule sync
+        run: |
+          cd onnxruntime-${{ matrix.ver.onnx }}
+          git submodule sync --recursive
+          git submodule update --init --recursive
+
+      - name: patch source
+        run: |
+          cd onnxruntime-${{ matrix.ver.onnx }}
+          patch -p1 -i ../patchs/onnxruntime-1.6.0.patch
 
       # 复制编译脚本
       - name: copy build script

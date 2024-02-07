@@ -1,13 +1,12 @@
 #!/bin/bash
 # build onnxruntime by benjaminwan
 # CMakeFiles/onnxruntime.dir/link.txt/link/lib*.a
-# ANDROID_NDK_HOME=/path/android-sdk/ndk/22.1.7171670
 
 function collectLibs() {
   # shared lib
   cmake --build . --config Release --target install
-#  rm -r -f install/bin
-  mv install/include/onnxruntime/* install/include
+  rm -r -f install/bin
+  mv install/include/onnxruntime/core/session/* install/include
   rm -rf install/include/onnxruntime
   echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" > install/OnnxRuntimeConfig.cmake
   echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >> install/OnnxRuntimeConfig.cmake
@@ -38,58 +37,39 @@ function collectLibs() {
   cp CMakeFiles/onnxruntime.dir/link.txt install-static/link.log
 }
 
-function pyBuild() {
-  echo ANDROID_HOME=$ANDROID_HOME
-  echo ANDROID_NDK_HOME=$ANDROID_NDK_HOME
-  python3 $DIR/tools/ci_build/build.py --build_dir $DIR/build-android-$1 \
-    --config Release \
-    --parallel \
-    --skip_tests \
-    --build_shared_lib \
-    --build_java \
-    --android \
-    --android_abi $1 \
-    --android_api $2 \
-    --android_sdk_path $ANDROID_HOME \
-    --android_ndk_path $ANDROID_NDK_HOME \
-    --cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF
-
-  pushd build-android-$1/Release
-  cmake --build . --config Release -j $NUM_THREADS
+function cmakeBuild() {
+  mkdir -p "build-$sysOS"
+  pushd "build-$sysOS"
+  cmake -DCMAKE_BUILD_TYPE=$1 \
+    -DCMAKE_INSTALL_PREFIX=install \
+    $(cat ../onnxruntime_options-v1.6.0.txt) \
+    ../cmake
+  cmake --build . -j $NUM_THREADS
+  cmake --build . --target install
   collectLibs
   popd
 }
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 sysOS=$(uname -s)
 NUM_THREADS=1
 
 if [ $sysOS == "Darwin" ]; then
+  #echo "I'm MacOS"
   NUM_THREADS=$(sysctl -n hw.ncpu)
 elif [ $sysOS == "Linux" ]; then
+  #echo "I'm Linux"
   NUM_THREADS=$(nproc)
 else
   echo "Other OS: $sysOS"
   exit 0
 fi
 
-if [ "$1" ]; then
-    echo "set ARCH_TYPE=$1"
-    ARCH_TYPE="$1"
-else
-    echo "#1 ARCH_TYPE is empty("armeabi-v7a","arm64-v8a","x86","x86_64"), use arm64-v8a"
-    ARCH_TYPE="arm64-v8a"
-fi
+# 1st sync submodule
+# git submodule sync --recursive
+# git submodule update --init --recursive
 
-if [ "$2" ]; then
-    echo "set MIN_SDK=$2"
-    MIN_SDK="$2"
-else
-    echo "#2 MIN_SDK is empty, use 21"
-fi
+# 2nd patch source
+# cd ../onnxruntime
+# patch -p1 -i ../patchs/onnxruntime-1.6.0.patch
 
-pyBuild $1 $2
-
-#echo "message(\"OnnxRuntime Path: \${CMAKE_CURRENT_LIST_DIR}/\${ANDROID_ABI}\")" > OnnxRuntimeWrapper.cmake
-#echo "set(OnnxRuntime_DIR \"\${CMAKE_CURRENT_LIST_DIR}/\${ANDROID_ABI}\")" >> OnnxRuntimeWrapper.cmake
-
+cmakeBuild "Release"
