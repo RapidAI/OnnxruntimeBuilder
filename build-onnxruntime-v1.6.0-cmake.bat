@@ -90,7 +90,6 @@ cmake -A "%~1" -T "%~2,host=x64" ^
   -DCMAKE_INSTALL_PREFIX=install ^
   %OPTIONS% ^
   -Donnxruntime_MSVC_STATIC_RUNTIME=%STATIC_CRT_ENABLED% ^
-  -Donnxruntime_BUILD_JAVA=ON ^
   ../cmake
 cmake --build . --config Release -j %NUMBER_OF_PROCESSORS%
 cmake --build . --config Release --target install

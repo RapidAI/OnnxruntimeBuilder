@@ -16,6 +16,7 @@ jobs:
         list:
           - { win_ver: 2019, vs_name: vs2017, vs_ver: v141 }
           - { win_ver: 2019, vs_name: vs2019, vs_ver: v142 }
+          - { win_ver: 2022, vs_name: vs2022, vs_ver: v143 }
         crt:
           [
             md,
@@ -31,7 +32,6 @@ jobs:
       BUILD_OPTIONS: onnxruntime_options-${{ matrix.ver.onnx }}.txt
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-windows-${{ matrix.list.vs_name }}-shared-${{ matrix.crt }}
       STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-windows-${{ matrix.list.vs_name }}-static-${{ matrix.crt }}
-      JAVA_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-windows-${{ matrix.list.vs_name }}-java-${{ matrix.crt }}
 
     steps:
       - name: Set up Python
@@ -94,8 +94,6 @@ jobs:
           7z a ${{ env.STATIC_PKG_NAME }}.7z windows-x64 windows-x86
           rm windows-x64 -r -fo
           rm windows-x86 -r -fo
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/java/build/libs ${{ env.JAVA_PKG_NAME }}
-          7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
 
       # 上传artifact
       - name: upload
@@ -109,12 +107,6 @@ jobs:
         with:
           name: ${{ env.STATIC_PKG_NAME }}
           path: ${{ env.STATIC_PKG_NAME }}.7z
-
-      - name: upload
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.JAVA_PKG_NAME }}
-          path: ${{ env.JAVA_PKG_NAME }}.7z
 
   release:
     needs: [ windows ]
