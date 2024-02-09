@@ -2,6 +2,9 @@ name: musl
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - '*'
 
 jobs:
   musl-cross-build:
@@ -71,6 +74,7 @@ jobs:
 
     env:
       BUILD_SCRIPT: build-onnxruntime-${{ matrix.ver.onnx }}-musl.sh
+      BUILD_OPTIONS: onnxruntime_options-${{ matrix.ver.onnx }}.txt
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-shared
       STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-static
 
@@ -109,6 +113,7 @@ jobs:
       - name: copy
         run: |
           cp ${{ env.BUILD_SCRIPT }} onnxruntime-${{ matrix.ver.onnx }}
+          cp ${{ env.BUILD_OPTIONS }} onnxruntime-${{ matrix.ver.onnx }}
           wget https://github.com/benjaminwan/musl-cross-builder/raw/main/musl-cross.toolchain.cmake -O musl-cross.toolchain.cmake
           cp musl-cross.toolchain.cmake onnxruntime-${{ matrix.ver.onnx }}
 
@@ -121,10 +126,10 @@ jobs:
       # install文件夹改名linux，并使用7z压缩
       - name: 7zip
         run: |
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/install linux
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/install linux
           7z a ${{ env.SHARED_PKG_NAME }}.7z linux
           rm -r -f linux
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/install-static linux
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/install-static linux
           7z a ${{ env.STATIC_PKG_NAME }}.7z linux
           rm -r -f linux
 
