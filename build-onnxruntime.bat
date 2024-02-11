@@ -6,8 +6,8 @@ cls
 SETLOCAL EnableDelayedExpansion
 
 IF "%1"=="" (
-    echo input VS_VER none, use v142
-	set VS_VER="v142"
+    echo input VS_VER none, use v143
+	set VS_VER="v143"
 )^
 ELSE (
 	echo input VS_VER:%1
@@ -73,7 +73,7 @@ if "%~1" == "Win32" (
 else (
     set MACHINE_FLAG="--build_java"
 )
-if "%~2" == "v141" (
+if "%~2" == "v142" (
     set VS_FLAG=--cmake_generator "Visual Studio 16 2019"
 )^
 else (
@@ -90,9 +90,9 @@ python %~dp0\tools\ci_build\build.py --build_dir %~dp0\build-%~1-%~2-%~3 ^
 	--parallel ^
 	--skip_tests ^
 	--build_shared_lib ^
-	%STATIC_CRT_FLAG% ^
 	%MACHINE_FLAG% ^
 	%VS_FLAG% ^
+	%STATIC_CRT_FLAG% ^
 	--cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF
 pushd "build-%~1-%~2-%~3"\Release
 cmake --build . --config Release -j %NUMBER_OF_PROCESSORS%

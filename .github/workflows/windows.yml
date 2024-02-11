@@ -32,17 +32,17 @@ jobs:
       JAVA_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-windows-${{ matrix.list.vs_name }}-java-${{ matrix.crt }}
 
     steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8.10'
+
       # Setup JDK 8
       - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
           java-version: '8'
           distribution: 'adopt'
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.8.10'
 
       # 检出代码
       - uses: actions/checkout@v3
@@ -70,17 +70,17 @@ jobs:
       # install文件夹改名，并使用7z压缩
       - name: 7zip
         run: |
-          mv onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install windows-x64
-          mv onnxruntime-${{ matrix.ver.onnx }}/build-Win32-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install windows-x86
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install windows-x64
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Win32-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install windows-x86
           7z a ${{ env.SHARED_PKG_NAME }}.7z windows-x64 windows-x86
           rm windows-x64 -r -fo
           rm windows-x86 -r -fo
-          mv onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install-static windows-x64
-          mv onnxruntime-${{ matrix.ver.onnx }}/build-Win32-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install-static windows-x86
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install-static windows-x64
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Win32-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/install-static windows-x86
           7z a ${{ env.STATIC_PKG_NAME }}.7z windows-x64 windows-x86
           rm windows-x64 -r -fo
           rm windows-x86 -r -fo
-          mv onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
           7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
 
       # 上传artifact

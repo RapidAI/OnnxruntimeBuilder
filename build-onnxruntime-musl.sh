@@ -1,3 +1,7 @@
+#!/bin/bash
+# build onnxruntime by benjaminwan
+# CMakeFiles/onnxruntime.dir/link.txt/link/lib*.a
+
 function collectLibs() {
   # shared lib
   cmake --build . --config Release --target install
@@ -33,7 +37,31 @@ function collectLibs() {
   cp CMakeFiles/onnxruntime.dir/link.txt install-static/link.log
 }
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+function cmakeBuild() {
+  mkdir -p "build-$sysOS"
+  pushd "build-$sysOS"
+
+  mkdir -p "host_protoc"
+  pushd "host_protoc"
+  cmake -Dprotobuf_BUILD_TESTS=OFF \
+  -Dprotobuf_WITH_ZLIB_DEFAULT=OFF \
+  -Dprotobuf_BUILD_SHARED_LIBS=OFF \
+  ../../cmake/external/protobuf/cmake
+  cmake --build . -j $NUM_THREADS --config Release --target protoc
+  popd
+  BUILD_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  cmake -DCMAKE_BUILD_TYPE=$1 \
+    -DCMAKE_TOOLCHAIN_FILE=../musl-cross.toolchain.cmake \
+    -DONNX_CUSTOM_PROTOC_EXECUTABLE=$BUILD_DIR/host_protoc/protoc \
+    -DCMAKE_INSTALL_PREFIX=install \
+    $(cat ../onnxruntime_options-v1.6.0.txt) \
+    ../cmake
+  cmake --build . -j $NUM_THREADS
+  cmake --build . --target install
+  collectLibs
+  popd
+}
+
 sysOS=$(uname -s)
 NUM_THREADS=1
 
@@ -56,14 +84,10 @@ else
   exit 0
 fi
 
-python3 $DIR/tools/ci_build/build.py --build_dir $DIR/build-$sysOS \
-    --config Release \
-    --parallel \
-    --skip_tests \
-    --build_shared_lib \
-    --cmake_extra_defines CMAKE_INSTALL_PREFIX=./install CMAKE_TOOLCHAIN_FILE=../../musl-cross.toolchain.cmake onnxruntime_BUILD_UNIT_TESTS=OFF
+# 1st sync submodule
+# git submodule sync --recursive
+# git submodule update --init --recursive
 
-pushd build-$sysOS/Release
-cmake --build . --config Release -j$NUM_THREADS
-collectLibs
-popd
+
+cmakeBuild "Release"
+

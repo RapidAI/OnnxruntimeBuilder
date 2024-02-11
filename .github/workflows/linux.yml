@@ -26,7 +26,7 @@ jobs:
             ppc64le,
           ]
 
-    name: ubuntu-${{ matrix.list.os_ver }}-${{ matrix.arch }}
+    name: ${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}
 
     env:
       BUILD_SCRIPT: build-onnxruntime.sh
