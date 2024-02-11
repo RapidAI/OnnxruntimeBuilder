@@ -15,8 +15,9 @@ jobs:
       matrix:
         os_name: [ubuntu]
         ver:
-          - { onnx: v1.17.0, cmake: 3.28.2, python: 3.8.18, gradle: 8.5, jdk: openjdk-8-jdk }
+          - { onnx: v1.15.1, cmake: 3.28.2, python: 3.8.18, gradle: 8.0.1, jdk: openjdk-8-jdk }
         list:
+          - { os_ver: 18.04, os_id: bionic }
           - { os_ver: 20.04, os_id: focal }
           - { os_ver: 22.04, os_id: jammy }
         arch:

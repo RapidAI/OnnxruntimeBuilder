@@ -12,8 +12,9 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.17.0 }
+          - { onnx: v1.15.1 }
         list:
+          - { win_ver: 2019, vs_name: vs2019, vs_ver: v142 }
           - { win_ver: 2022, vs_name: vs2022, vs_ver: v143 }
         crt:
           [

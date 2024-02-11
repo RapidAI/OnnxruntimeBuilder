@@ -6,7 +6,7 @@ function collectLibs() {
   # shared lib
   cmake --build . --config Release --target install
 #  rm -r -f install/bin
-  mv install/include/onnxruntime/* install/include
+  mv install/include/onnxruntime/core/session/* install/include
   rm -rf install/include/onnxruntime
   echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" > install/OnnxRuntimeConfig.cmake
   echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >> install/OnnxRuntimeConfig.cmake
@@ -41,20 +41,19 @@ function cmakeBuild() {
   mkdir -p "build-$sysOS"
   pushd "build-$sysOS"
 
-  mkdir -p "host_protoc"
-  pushd "host_protoc"
-  cmake -Dprotobuf_BUILD_TESTS=OFF \
-  -Dprotobuf_WITH_ZLIB_DEFAULT=OFF \
-  -Dprotobuf_BUILD_SHARED_LIBS=OFF \
-  ../../cmake/external/protobuf/cmake
-  cmake --build . -j $NUM_THREADS --config Release --target protoc
-  popd
-  BUILD_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#  mkdir -p "host_protoc"
+#  pushd "host_protoc"
+#  cmake -Dprotobuf_BUILD_TESTS=OFF \
+#  -Dprotobuf_WITH_ZLIB_DEFAULT=OFF \
+#  -Dprotobuf_BUILD_SHARED_LIBS=OFF \
+#  ../../cmake/external/protobuf/cmake
+#  cmake --build . -j $NUM_THREADS --config Release --target protoc
+#  popd
+#  BUILD_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
   cmake -DCMAKE_BUILD_TYPE=$1 \
     -DCMAKE_TOOLCHAIN_FILE=../musl-cross.toolchain.cmake \
-    -DONNX_CUSTOM_PROTOC_EXECUTABLE=$BUILD_DIR/host_protoc/protoc \
     -DCMAKE_INSTALL_PREFIX=install \
-    $(cat ../onnxruntime_options-v1.6.0.txt) \
+    $(cat ../onnxruntime_options-v1.15.1.txt) \
     ../cmake
   cmake --build . -j $NUM_THREADS
   cmake --build . --target install
@@ -90,4 +89,5 @@ fi
 
 
 cmakeBuild "Release"
+
 

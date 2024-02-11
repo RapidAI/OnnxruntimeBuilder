@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.17.0, musl: 11.3.1 }
+          - { onnx: v1.15.1, musl: 11.3.1 }
         arch:
           [
             aarch64-linux-musl,
@@ -74,7 +74,7 @@ jobs:
 
     env:
       BUILD_SCRIPT: build-onnxruntime-musl.sh
-      BUILD_OPTIONS: onnxruntime_options.txt
+      BUILD_OPTIONS: onnxruntime_options-${{ matrix.ver.onnx }}.txt
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-shared
       STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-static
 

@@ -6,8 +6,8 @@ cls
 SETLOCAL EnableDelayedExpansion
 
 IF "%1"=="" (
-    echo input VS_VER none, use v143
-	set VS_VER="v143"
+    echo input VS_VER none, use v142
+	set VS_VER="v142"
 )^
 ELSE (
 	echo input VS_VER:%1
@@ -42,7 +42,7 @@ GOTO:EOF
 :collectLibs
 cmake --build . --config Release --target install
 ::del /s/q install\*test*.exe
-copy install\include\onnxruntime\* install\include
+copy install\include\onnxruntime\core\session\* install\include
 rd /S /Q install\include\onnxruntime
 echo set(OnnxRuntime_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include") > install/OnnxRuntimeConfig.cmake
 echo include_directories(${OnnxRuntime_INCLUDE_DIRS}) >> install/OnnxRuntimeConfig.cmake
