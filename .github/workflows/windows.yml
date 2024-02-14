@@ -12,9 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.15.1 }
+          - { onnx: v1.16.3, gradle: 8.5 }
         list:
-          - { win_ver: 2019, vs_name: vs2019, vs_ver: v142 }
           - { win_ver: 2022, vs_name: vs2022, vs_ver: v143 }
         crt:
           [
@@ -44,6 +43,13 @@ jobs:
         with:
           java-version: '8'
           distribution: 'adopt'
+
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: ${{ matrix.ver.gradle }}
+
+      - name: test gradle
+        run: gradle --version
 
       # 检出代码
       - uses: actions/checkout@v3

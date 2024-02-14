@@ -6,7 +6,7 @@ function collectLibs() {
   # shared lib
   cmake --build . --config Release --target install
 #  rm -r -f install/bin
-  mv install/include/onnxruntime/core/session/* install/include
+  mv install/include/onnxruntime/* install/include
   rm -rf install/include/onnxruntime
   echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" > install/OnnxRuntimeConfig.cmake
   echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >> install/OnnxRuntimeConfig.cmake
@@ -53,7 +53,7 @@ function cmakeBuild() {
   cmake -DCMAKE_BUILD_TYPE=$1 \
     -DCMAKE_TOOLCHAIN_FILE=../musl-cross.toolchain.cmake \
     -DCMAKE_INSTALL_PREFIX=install \
-    $(cat ../onnxruntime_options-v1.15.1.txt) \
+    $(cat ../onnxruntime_options-v1.16.3.txt) \
     ../cmake
   cmake --build . -j $NUM_THREADS
   cmake --build . --target install
