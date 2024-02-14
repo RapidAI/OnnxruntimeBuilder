@@ -2,9 +2,6 @@ name: musl
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
 
 jobs:
   musl-cross-build:
@@ -14,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.17.0, musl: 11.3.1 }
+          - { onnx: v1.17.0, musl: 12.2.0 }
         arch:
           [
             aarch64-linux-musl,
@@ -74,7 +71,7 @@ jobs:
 
     env:
       BUILD_SCRIPT: build-onnxruntime-musl.sh
-      BUILD_OPTIONS: onnxruntime_options.txt
+      BUILD_OPTIONS: onnxruntime_options-${{ matrix.ver.onnx }}.txt
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-shared
       STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-static
 

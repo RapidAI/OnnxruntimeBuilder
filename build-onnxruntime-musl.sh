@@ -41,20 +41,24 @@ function cmakeBuild() {
   mkdir -p "build-$sysOS"
   pushd "build-$sysOS"
 
-  mkdir -p "host_protoc"
-  pushd "host_protoc"
-  cmake -Dprotobuf_BUILD_TESTS=OFF \
-  -Dprotobuf_WITH_ZLIB_DEFAULT=OFF \
-  -Dprotobuf_BUILD_SHARED_LIBS=OFF \
-  ../../cmake/external/protobuf/cmake
-  cmake --build . -j $NUM_THREADS --config Release --target protoc
-  popd
-  BUILD_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#  mkdir -p "host_protoc"
+#  pushd "host_protoc"
+#  cmake -Dprotobuf_BUILD_TESTS=OFF \
+#  -Dprotobuf_WITH_ZLIB_DEFAULT=OFF \
+#  -Dprotobuf_BUILD_SHARED_LIBS=OFF \
+#  ../../cmake/external/protobuf/cmake
+#  cmake --build . -j $NUM_THREADS --config Release --target protoc
+#  popd
+#  BUILD_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
   cmake -DCMAKE_BUILD_TYPE=$1 \
     -DCMAKE_TOOLCHAIN_FILE=../musl-cross.toolchain.cmake \
-    -DONNX_CUSTOM_PROTOC_EXECUTABLE=$BUILD_DIR/host_protoc/protoc \
     -DCMAKE_INSTALL_PREFIX=install \
-    $(cat ../onnxruntime_options-v1.6.0.txt) \
+    -DCMAKE_C_FLAGS="-DNDEBUG -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fstack-protector-strong -O3 -pipe -fstack-clash-protection -fcf-protection" \
+    -DCMAKE_CXX_FLAGS="-DNDEBUG -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fstack-protector-strong -O3 -pipe -fstack-clash-protection -fcf-protection" \
+    -DCMAKE_EXE_LINKER_FLAGS_INIT="-Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,--strip-all" \
+    -DCMAKE_MODULE_LINKER_FLAGS_INIT="-Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,--strip-all" \
+    -DCMAKE_SHARED_LINKER_FLAGS_INIT="-Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,--strip-all" \
+    $(cat ../onnxruntime_options-v1.17.0.txt) \
     ../cmake
   cmake --build . -j $NUM_THREADS
   cmake --build . --target install
@@ -90,4 +94,3 @@ fi
 
 
 cmakeBuild "Release"
-
