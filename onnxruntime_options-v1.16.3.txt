@@ -1,9 +1,9 @@
 -Donnxruntime_RUN_ONNX_TESTS=OFF
--Donnxruntime_GENERATE_TEST_REPORTS=ON
+-Donnxruntime_GENERATE_TEST_REPORTS=OFF
 -Donnxruntime_USE_MIMALLOC=OFF
 -Donnxruntime_ENABLE_PYTHON=OFF
 -Donnxruntime_BUILD_CSHARP=OFF
--Donnxruntime_BUILD_JAVA=ON
+-Donnxruntime_BUILD_JAVA=OFF
 -Donnxruntime_BUILD_NODEJS=OFF
 -Donnxruntime_BUILD_OBJC=OFF
 -Donnxruntime_BUILD_SHARED_LIB=ON
