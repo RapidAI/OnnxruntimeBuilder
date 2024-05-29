@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.17.3, gradle: 8.6 }
+          - { onnx: v1.18.0, gradle: 8.6 }
         list:
           - { os_ver: 11 }
           - { os_ver: 12 }

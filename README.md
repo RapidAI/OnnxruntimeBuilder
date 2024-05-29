@@ -44,7 +44,7 @@
 
 ### musl版本说明
 
-- v1.17.0暂时无法用musl工具链编译成功;
+- v1.17以上暂时无法用musl工具链编译成功;
 - 必须选择一致的工具链版本来编译bin文件;
 - 工具链可以从此处获得https://github.com/benjaminwan/musl-cross-builder
 
