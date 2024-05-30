@@ -41,6 +41,7 @@
 
 - 最好选择与你的gcc一致的版本;
 - 低版本gcc使用高版本工具编译出来的库会出错;
+- onnxruntime 1.17.0以上 在ubuntu 20.04 arm64无法支持，编译出错信息:The compiler doesn't support BFLOAT16
 
 ### musl版本说明
 
