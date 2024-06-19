@@ -15,7 +15,7 @@ jobs:
       matrix:
         os_name: [ubuntu]
         ver:
-          - { onnx: v1.6.0, cmake: 3.28.2, python: 3.8.18, gradle: 6.5, jdk: openjdk-8-jdk }
+          - { onnx: v1.6.0, cmake: 3.28.6, python: 3.8.19, gradle: 6.5, jdk: openjdk-8-jdk }
         list:
           - { os_ver: 14.04, os_id: trusty }
           - { os_ver: 16.04, os_id: xenial }
