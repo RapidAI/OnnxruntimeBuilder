@@ -24,6 +24,7 @@ jobs:
           - { os_ver: 22.04, os_id: jammy }
         arch:
           [
+            386,
             amd64,
             arm,
             arm64,
