@@ -1,34 +1,49 @@
 :: build onnxruntime for windows by benjaminwan
 :: x64 build_java, x86 Java is currently not supported on 32-bit x86 architecture
+:: use in powershell
+:: Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+:: & 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1' -SkipAutomaticLocation -HostArch amd64 -Arch amd64
 @ECHO OFF
 chcp 65001
 cls
 SETLOCAL EnableDelayedExpansion
 
 IF "%1"=="" (
-    echo input VS_VER none, use v143
-	set VS_VER="v143"
-)^
+    ECHO input VS_VER none, use v143
+    set VS_VER="v143"
+) ^
 ELSE (
-	echo input VS_VER:%1
+    ECHO input VS_VER:%1
     set VS_VER="%1"
 )
 
 IF "%2"=="" (
-    echo input CRT none, use mt
-	set CRT="mt"
-)^
+    ECHO input CRT none, use mt
+    set CRT="mt"
+) ^
 ELSE (
-	echo input CRT:%2
+    ECHO input CRT:%2
     set CRT="%2"
 )
 
 call :cmakeParams "x64" %VS_VER% %CRT%
-call :cmakeParams "Win32" %VS_VER% %CRT%
+::call :cmakeParams "Win32" %VS_VER% %CRT%
 GOTO:EOF
 
 :getFileName
 call set "libs=%%libs%% %~n1"
+GOTO:EOF
+
+:getFullPathAndName
+call set "libs=%%libs%% %~1"
+GOTO:EOF
+
+:check_libexe_exists
+::powershell -Command "if(Get-Command lib.exe -errorAction SilentlyContinue) {'true'} else {'false'}"
+set pscmdline='powershell -Command "if(Get-Command lib.exe -errorAction SilentlyContinue) {'true'} else {'false'}"'
+for /f %%a in (%pscmdline%) do (
+    set libexe_exists=%%a
+)
 GOTO:EOF
 
 :getLibsList
@@ -44,26 +59,47 @@ cmake --build . --config Release --target install
 ::del /s/q install\*test*.exe
 copy install\include\onnxruntime\* install\include
 rd /S /Q install\include\onnxruntime
-echo set(OnnxRuntime_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include") > install/OnnxRuntimeConfig.cmake
-echo include_directories(${OnnxRuntime_INCLUDE_DIRS}) >> install/OnnxRuntimeConfig.cmake
-echo link_directories(${CMAKE_CURRENT_LIST_DIR}/lib) >> install/OnnxRuntimeConfig.cmake
-echo set(OnnxRuntime_LIBS onnxruntime) >> install/OnnxRuntimeConfig.cmake
+ECHO set(OnnxRuntime_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include") > install/OnnxRuntimeConfig.cmake
+ECHO include_directories(${OnnxRuntime_INCLUDE_DIRS}) >> install/OnnxRuntimeConfig.cmake
+ECHO link_directories(${CMAKE_CURRENT_LIST_DIR}/lib) >> install/OnnxRuntimeConfig.cmake
+ECHO set(OnnxRuntime_LIBS onnxruntime) >> install/OnnxRuntimeConfig.cmake
 
 mkdir install-static\lib
 xcopy install\include install-static\include /s /y /i
 call :getLibsList
 
-set libs=
-for /f "Delims=" %%a in (libs_list.txt) do (
-copy %%a install-static\lib
-call :getFileName %%a
+call :check_libexe_exists
+
+IF "%libexe_exists%" == "true" (
+    ECHO "libexe_exists=%libexe_exists%"
+    set libs=
+    for /f "Delims=" %%a in (libs_list.txt) do (
+        call :getFullPathAndName %%a
+    )
+) ELSE (
+    ECHO "libexe_exists=%libexe_exists%"
+    set libs=
+    for /f "Delims=" %%a in (libs_list.txt) do (
+        copy %%a install-static\lib
+        call :getFileName %%a
+    )
 )
 
-echo set(OnnxRuntime_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include") > install-static\OnnxRuntimeConfig.cmake
-echo include_directories(${OnnxRuntime_INCLUDE_DIRS}) >> install-static\OnnxRuntimeConfig.cmake
-echo link_directories(${CMAKE_CURRENT_LIST_DIR}/lib) >> install-static\OnnxRuntimeConfig.cmake
-echo set(OnnxRuntime_LIBS %libs%) >> install-static\OnnxRuntimeConfig.cmake
 copy onnxruntime.dir\Release\onnxruntime.tlog\link.read.1.tlog install-static\link.log
+ECHO set(OnnxRuntime_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include")>install-static\OnnxRuntimeConfig.cmake
+ECHO include_directories(${OnnxRuntime_INCLUDE_DIRS})>>install-static\OnnxRuntimeConfig.cmake
+ECHO link_directories(${CMAKE_CURRENT_LIST_DIR}/lib)>>install-static\OnnxRuntimeConfig.cmake
+
+IF "%libexe_exists%" == "true" (
+ECHO set(OnnxRuntime_LIBS onnxruntime.lib)>>install-static\OnnxRuntimeConfig.cmake
+) ELSE (
+ECHO set(OnnxRuntime_LIBS %libs%)>>install-static\OnnxRuntimeConfig.cmake
+)
+
+::IF "%libexe_exists%" == "true" (
+::    lib.exe /OUT:install-static\lib\onnxruntime.lib %libs%
+::)
+
 GOTO:EOF
 
 :cmakeParams
@@ -73,16 +109,16 @@ if "%~1" == "Win32" (
 else (
     set MACHINE_FLAG="--build_java"
 )
-if "%~2" == "v142" (
+IF "%~2" == "v142" (
     set VS_FLAG=--cmake_generator "Visual Studio 16 2019"
-)^
-else (
+) ^
+ELSE (
     set VS_FLAG=--cmake_generator "Visual Studio 17 2022"
 )
-if "%~3" == "mt" (
+IF "%~3" == "mt" (
     set STATIC_CRT_FLAG="--enable_msvc_static_runtime"
-)^
-else (
+) ^
+ELSE (
     set STATIC_CRT_FLAG=
 )
 python %~dp0\tools\ci_build\build.py --build_dir %~dp0\build-%~1-%~2-%~3 ^
