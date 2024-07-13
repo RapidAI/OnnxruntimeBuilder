@@ -2,9 +2,6 @@ name: linux
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
 
 jobs:
   linux:
@@ -36,11 +33,11 @@ jobs:
 
     steps:
       # 检出代码
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # 检出onnxruntime
       - name: checkout onnxruntime
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: microsoft/onnxruntime
           path: onnxruntime-${{ matrix.ver.onnx }}
