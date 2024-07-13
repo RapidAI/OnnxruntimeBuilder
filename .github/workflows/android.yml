@@ -2,9 +2,6 @@ name: android
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
 
 jobs:
   android:

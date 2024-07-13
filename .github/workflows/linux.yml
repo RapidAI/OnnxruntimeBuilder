@@ -2,9 +2,6 @@ name: linux
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
 
 jobs:
   linux:

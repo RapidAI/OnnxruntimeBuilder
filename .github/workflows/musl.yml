@@ -2,9 +2,6 @@ name: musl
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
 
 jobs:
   musl-cross-build:
