@@ -35,8 +35,8 @@ jobs:
         with:
           python-version: '3.8.10'
 
-      # Setup JDK 8
-      - name: Set up JDK 8
+      # Setup JDK
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '${{ matrix.list.java }}'
