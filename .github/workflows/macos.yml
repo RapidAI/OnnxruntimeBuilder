@@ -2,9 +2,6 @@ name: macos
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
 
 jobs:
   macos:
@@ -15,18 +12,22 @@ jobs:
         ver:
           - { onnx: v1.6.0, gradle: 6.5 }
         list:
-          - { os_ver: 11 }
           - { os_ver: 12 }
           - { os_ver: 13 }
           - { os_ver: 14 }
+        arch:
+          [
+            x86_64,
+            arm64,
+          ]
 
     runs-on: macos-${{ matrix.list.os_ver }}
 
     env:
-      BUILD_SCRIPT: build-onnxruntime-${{ matrix.ver.onnx }}.sh
-      SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-shared
-      STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-static
-      JAVA_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-java
+      BUILD_SCRIPT: build-onnxruntime-mac.sh
+      SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-${{ matrix.arch }}-shared
+      STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-${{ matrix.arch }}-static
+      JAVA_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-macos-${{ matrix.list.os_ver }}-${{ matrix.arch }}-java
 
     steps:
       - name: Set up Python
@@ -81,34 +82,40 @@ jobs:
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
           chmod a+x ${{ env.BUILD_SCRIPT }}
-          ./${{ env.BUILD_SCRIPT }}
+          ./${{ env.BUILD_SCRIPT }} -a ${{ matrix.arch }}
 
       # install文件夹改名macos，并使用7z压缩
-      - name: 7z
+      - name: 7z shared lib
         run: |
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin/Release/install macos
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin-${{ matrix.arch }}/Release/install macos
           7z a ${{ env.SHARED_PKG_NAME }}.7z macos
           rm -r -f macos
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin/Release/install-static macos
+
+      - name: 7z static lib
+        run: |
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin-${{ matrix.arch }}/Release/install-static macos
           7z a ${{ env.STATIC_PKG_NAME }}.7z macos
           rm -r -f macos
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
+
+      - name: 7z java lib
+        run: |
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin-${{ matrix.arch }}/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
           7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
 
       # 上传artifact
-      - name: upload
+      - name: upload shared lib
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.SHARED_PKG_NAME }}
           path: ${{ env.SHARED_PKG_NAME }}.7z
 
-      - name: upload
+      - name: upload static lib
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.STATIC_PKG_NAME }}
           path: ${{ env.STATIC_PKG_NAME }}.7z
 
-      - name: upload
+      - name: upload java lib
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.JAVA_PKG_NAME }}
