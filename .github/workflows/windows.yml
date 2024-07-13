@@ -11,8 +11,8 @@ jobs:
         ver:
           - { onnx: v1.15.1, python: 3.8.10, jdk: 8, gradle: 8.0.1 }
         list:
-          - { win_ver: 2019, vs_name: vs2019, vs_ver: v142 }
-          - { win_ver: 2022, vs_name: vs2022, vs_ver: v143 }
+          - { win_ver: 2019, vs_name: vs2019, vs_ver: v142, vs_path: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise' }
+          - { win_ver: 2022, vs_name: vs2022, vs_ver: v143, vs_path: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise' }
         crt:
           [
             md,
@@ -65,26 +65,27 @@ jobs:
       - name: copy build script
         run: |
           cp ${{ env.BUILD_SCRIPT }} onnxruntime-${{ matrix.ver.onnx }}
+          cp Launch-VsDevShell.ps1 onnxruntime-${{ matrix.ver.onnx }}
 
       - name: build x64
         shell: powershell
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
-          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1' -SkipAutomaticLocation -HostArch amd64 -Arch amd64
+          & '.\Launch-VsDevShell.ps1' -VsInstallationPath '${{ matrix.list.vs_path }}' -SkipAutomaticLocation -HostArch amd64 -Arch amd64
           .\${{ env.BUILD_SCRIPT }} -VsArch x64 -VsVer ${{ matrix.list.vs_ver }} -VsCRT ${{ matrix.crt }} 
 
       - name: build x86
         shell: powershell
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
-          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1' -SkipAutomaticLocation -HostArch amd64 -Arch x86
+          & '.\Launch-VsDevShell.ps1' -VsInstallationPath '${{ matrix.list.vs_path }}' -SkipAutomaticLocation -HostArch amd64 -Arch x86
           .\${{ env.BUILD_SCRIPT }} -VsArch x86 -VsVer ${{ matrix.list.vs_ver }} -VsCRT ${{ matrix.crt }} 
 
       - name: build arm64
         shell: powershell
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
-          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1' -SkipAutomaticLocation -HostArch amd64 -Arch arm64
+          & '.\Launch-VsDevShell.ps1' -VsInstallationPath '${{ matrix.list.vs_path }}' -SkipAutomaticLocation -HostArch amd64 -Arch arm64
           .\${{ env.BUILD_SCRIPT }} -VsArch arm64 -VsVer ${{ matrix.list.vs_ver }} -VsCRT ${{ matrix.crt }} 
 
       # install文件夹改名，并使用7z压缩
@@ -112,7 +113,7 @@ jobs:
         shell: powershell
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
-          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1' -SkipAutomaticLocation -HostArch amd64 -Arch amd64
+          & '.\Launch-VsDevShell.ps1' -VsInstallationPath '${{ matrix.list.vs_path }}' -SkipAutomaticLocation -HostArch amd64 -Arch amd64
           .\${{ env.BUILD_SCRIPT }} -VsArch x64 -VsVer ${{ matrix.list.vs_ver }} -VsCRT ${{ matrix.crt }} -BuildJava
 
       - name: 7zip pack java libs
