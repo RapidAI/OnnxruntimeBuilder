@@ -33,7 +33,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.8.18'
+          python-version: '3.8.10'
 
       # Setup JDK 8
       - name: Set up JDK 8

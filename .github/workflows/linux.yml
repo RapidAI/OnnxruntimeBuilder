@@ -21,7 +21,6 @@ jobs:
           - { os_ver: 22.04, os_id: jammy }
         arch:
           [
-            386,
             amd64,
             arm,
             arm64,
@@ -30,14 +29,8 @@ jobs:
         exclude:
           - list: { os_ver: 14.04, os_id: trusty }
             arch: ppc64le
-          - list: { os_ver: 14.04, os_id: trusty }
-            arch: 386
           - list: { os_ver: 16.04, os_id: xenial }
             arch: ppc64le
-          - list: { os_ver: 20.04, os_id: focal }
-            arch: 386
-          - list: { os_ver: 22.04, os_id: jammy }
-            arch: 386
 
     name: ${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}
 
