@@ -20,6 +20,9 @@ jobs:
             x86_64,
             arm64,
           ]
+        exclude:
+          - list: { os_ver: 14, java: 11 }
+            arch: x86_64
 
     runs-on: macos-${{ matrix.list.os_ver }}
 
