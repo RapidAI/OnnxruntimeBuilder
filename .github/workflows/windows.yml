@@ -9,9 +9,9 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.18.0, gradle: 8.6 }
+          - { onnx: v1.18.0, python: 3.8.10, jdk: 11, gradle: 8.6 }
         list:
-          - { win_ver: 2022, vs_name: vs2022, vs_ver: v143 }
+          - { win_ver: 2022, vs_name: vs2022, vs_ver: v143, vs_path: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise' }
         crt:
           [
             md,
@@ -23,22 +23,22 @@ jobs:
     name: windows-${{ matrix.list.vs_name }}-${{ matrix.crt }}
 
     env:
-      BUILD_SCRIPT: build-onnxruntime.ps1
+      BUILD_SCRIPT: build-onnxruntime-win.ps1
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-windows-${{ matrix.list.vs_name }}-shared-${{ matrix.crt }}
       STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-windows-${{ matrix.list.vs_name }}-static-${{ matrix.crt }}
-      JAVA_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-windows-${{ matrix.list.vs_name }}-java-${{ matrix.crt }}
+      JAVA_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-windows-${{ matrix.list.vs_name }}-java-x64-${{ matrix.crt }}
 
     steps:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.8.10'
+          python-version: '${{ matrix.ver.python }}'
 
-      # Setup JDK 11
-      - name: Set up JDK 11
+      # Setup JDK
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '${{ matrix.ver.jdk }}'
           distribution: 'adopt'
 
       - uses: gradle/actions/setup-gradle@v3
@@ -64,27 +64,28 @@ jobs:
       - name: copy build script
         run: |
           cp ${{ env.BUILD_SCRIPT }} onnxruntime-${{ matrix.ver.onnx }}
+          cp Launch-VsDevShell.ps1 onnxruntime-${{ matrix.ver.onnx }}
 
       - name: build x64
         shell: powershell
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
-          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1' -SkipAutomaticLocation -HostArch amd64 -Arch amd64
-          .\${{ env.BUILD_SCRIPT }} -VsArch x64 -VsCRT ${{ matrix.crt }}
+          & '.\Launch-VsDevShell.ps1' -VsInstallationPath '${{ matrix.list.vs_path }}' -SkipAutomaticLocation -HostArch amd64 -Arch amd64
+          .\${{ env.BUILD_SCRIPT }} -VsArch x64 -VsVer ${{ matrix.list.vs_ver }} -VsCRT ${{ matrix.crt }} 
 
       - name: build x86
         shell: powershell
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
-          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1' -SkipAutomaticLocation -HostArch amd64 -Arch x86
-          .\${{ env.BUILD_SCRIPT }} -VsArch x86 -VsCRT ${{ matrix.crt }}
+          & '.\Launch-VsDevShell.ps1' -VsInstallationPath '${{ matrix.list.vs_path }}' -SkipAutomaticLocation -HostArch amd64 -Arch x86
+          .\${{ env.BUILD_SCRIPT }} -VsArch x86 -VsVer ${{ matrix.list.vs_ver }} -VsCRT ${{ matrix.crt }} 
 
       - name: build arm64
         shell: powershell
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
-          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1' -SkipAutomaticLocation -HostArch amd64 -Arch arm64
-          .\${{ env.BUILD_SCRIPT }} -VsArch arm64 -VsCRT ${{ matrix.crt }}
+          & '.\Launch-VsDevShell.ps1' -VsInstallationPath '${{ matrix.list.vs_path }}' -SkipAutomaticLocation -HostArch amd64 -Arch arm64
+          .\${{ env.BUILD_SCRIPT }} -VsArch arm64 -VsVer ${{ matrix.list.vs_ver }} -VsCRT ${{ matrix.crt }} 
 
       # install文件夹改名，并使用7z压缩
       - name: 7zip pack shared libs
@@ -111,28 +112,28 @@ jobs:
         shell: powershell
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
-          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1' -SkipAutomaticLocation -HostArch amd64 -Arch amd64
-          .\${{ env.BUILD_SCRIPT }} -VsArch x64 -VsCRT ${{ matrix.crt }} -BuildJava
+          & '.\Launch-VsDevShell.ps1' -VsInstallationPath '${{ matrix.list.vs_path }}' -SkipAutomaticLocation -HostArch amd64 -Arch amd64
+          .\${{ env.BUILD_SCRIPT }} -VsArch x64 -VsVer ${{ matrix.list.vs_ver }} -VsCRT ${{ matrix.crt }} -BuildJava
 
       - name: 7zip pack java libs
-        run: |          
+        run: |
           cp -r onnxruntime-${{ matrix.ver.onnx }}/build-x64-${{ matrix.list.vs_ver }}-${{ matrix.crt }}/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
           7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
 
       # 上传artifact
-      - name: upload
+      - name: upload shared lib
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.SHARED_PKG_NAME }}
           path: ${{ env.SHARED_PKG_NAME }}.7z
 
-      - name: upload
+      - name: upload static lib
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.STATIC_PKG_NAME }}
           path: ${{ env.STATIC_PKG_NAME }}.7z
 
-      - name: upload
+      - name: upload java lib
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.JAVA_PKG_NAME }}

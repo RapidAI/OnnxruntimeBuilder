@@ -12,32 +12,36 @@ jobs:
       matrix:
         os_name: [ubuntu]
         ver:
-          - { onnx: v1.18.0, cmake: 3.28.2, python: 3.8.18, gradle: 8.6, jdk: openjdk-11-jdk }
+          - { onnx: v1.18.0, cmake: 3.28.6, python: 3.8.18, gradle: 8.6, jdk: openjdk-11-jdk }
         list:
           - { os_ver: 20.04, os_id: focal }
           - { os_ver: 22.04, os_id: jammy }
         arch:
           [
+            arm,
             amd64,
             arm64,
             ppc64le,
           ]
+        exclude:
+          - list: { os_ver: 20.04, os_id: focal }
+            arch: arm64
 
     name: ${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}
 
     env:
-      BUILD_SCRIPT: build-onnxruntime.sh
+      BUILD_SCRIPT: build-onnxruntime-linux.sh
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-ubuntu-${{ matrix.list.os_ver }}-${{ matrix.arch }}-shared
       STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-ubuntu-${{ matrix.list.os_ver }}-${{ matrix.arch }}-static
       JAVA_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-ubuntu-${{ matrix.list.os_ver }}-${{ matrix.arch }}-java
 
     steps:
       # 检出代码
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # 检出onnxruntime
       - name: checkout onnxruntime
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: microsoft/onnxruntime
           path: onnxruntime-${{ matrix.ver.onnx }}
@@ -63,11 +67,13 @@ jobs:
         run: |
           wget https://github.com/benjaminwan/CmakeBuilder/releases/download/${{ matrix.ver.cmake }}/cmake-${{ matrix.ver.cmake }}-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}.7z -O cmake-${{ matrix.ver.cmake }}.7z
           7z x cmake-${{ matrix.ver.cmake }}.7z -aoa
+          rm cmake-${{ matrix.ver.cmake }}.7z
 
       - name: deploy python
         run: |
           wget https://github.com/benjaminwan/PythonBuilder/releases/download/${{ matrix.ver.python }}/python-${{ matrix.ver.python }}-${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}.7z -O python-${{ matrix.ver.python }}.7z
           7z x python-${{ matrix.ver.python }}.7z -aoa
+          rm python-${{ matrix.ver.python }}.7z
 
       - name: deploy gradle
         run: |
@@ -100,40 +106,57 @@ jobs:
           echo "JAVA_HOME=$JAVA_DIR" >> env.custom
           echo "JAVA_INCLUDE_PATH=$JAVA_DIR/include" >> env.custom
 
-      - name: Docker - build
+      - name: Docker - build lib
         run: | 
           docker exec --env-file env.custom -w /root ${{ matrix.os_name }} git config --global --add safe.directory "*"
           docker exec --env-file env.custom -w /root/onnxruntime-${{ matrix.ver.onnx }} ${{ matrix.os_name }} chmod a+x ${{ env.BUILD_SCRIPT }}
           docker exec --env-file env.custom -w /root/onnxruntime-${{ matrix.ver.onnx }} ${{ matrix.os_name }} ./${{ env.BUILD_SCRIPT }}
 
       # install文件夹改名linux，并使用7z压缩
-      - name: 7zip
+      - name: 7zip shared lib
         run: |
           cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/install linux
           7z a ${{ env.SHARED_PKG_NAME }}.7z linux
           rm -r -f linux
+
+      - name: 7zip static lib
+        run: |
           cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/install-static linux
           7z a ${{ env.STATIC_PKG_NAME }}.7z linux
           rm -r -f linux
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
-          7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
+
+      - name: Docker - build java
+        run: |
+          docker exec --env-file env.custom -w /root/onnxruntime-${{ matrix.ver.onnx }} ${{ matrix.os_name }} ./${{ env.BUILD_SCRIPT }} -j
+
+      - name: 7zip java lib
+        run: |
+          if [ -d "onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/java/build/libs" ]; then
+            cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
+            7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
+          fi
 
       # 上传artifact
-      - name: upload
+      - name: upload shared lib
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.SHARED_PKG_NAME }}
           path: ${{ env.SHARED_PKG_NAME }}.7z
 
-      # 上传artifact
-      - name: upload
+      - name: upload static lib
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.STATIC_PKG_NAME }}
           path: ${{ env.STATIC_PKG_NAME }}.7z
 
-      # 上传artifact
-      - name: upload
+      - name: Check file existence
+        id: check_java_7z
+        uses: andstor/file-existence-action@v3
+        with:
+          files: "${{ env.JAVA_PKG_NAME }}.7z"
+
+      - name: upload java lib
+        if: steps.check_java_7z.outputs.files_exists == 'true'
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.JAVA_PKG_NAME }}
@@ -167,7 +190,7 @@ jobs:
         with:
           prerelease: false
           bodyFile: release.md
-          artifacts: ${{ env.SHARED_PKG_NAME }}.7z, ${{ env.STATIC_PKG_NAME }}.7z, ${{ env.JAVA_PKG_NAME }}.7z
+          artifacts: 'onnxruntime-*.7z'
           allowUpdates: true
           artifactContentType: application/x-7z-compressed
           token: ${{ secrets.GITHUB_TOKEN }}
