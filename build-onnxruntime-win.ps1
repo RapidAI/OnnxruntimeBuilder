@@ -256,6 +256,7 @@ python $PSScriptRoot\tools\ci_build\build.py `
 	--config $BuildType `
 	--parallel `
 	--skip_tests `
+	--compile_no_warning_as_error `
 	--cmake_generator $VsFlag `
 	$StaticCrtFlag `
 	--cmake_extra_defines CMAKE_INSTALL_PREFIX=./install onnxruntime_BUILD_UNIT_TESTS=OFF
