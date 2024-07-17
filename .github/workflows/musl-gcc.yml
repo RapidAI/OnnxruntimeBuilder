@@ -68,12 +68,47 @@ jobs:
             x86_64-linux-musl,
             x86_64-linux-muslx32,
           ]
+        exclude:
+          - arch: aarch64_be-linux-musl #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: armeb-linux-musleabi #error: ‘MLAS_FLOAT32X4’ does not name a type
+          - arch: armeb-linux-musleabihf #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: armel-linux-musleabi #error: ‘MLAS_FLOAT32X4’ does not name a type
+          - arch: armel-linux-musleabihf #error: static assertion failed
+          - arch: arm-linux-musleabi #error: ‘MLAS_FLOAT32X4’ does not name a type
+          - arch: arm-linux-musleabihf #error: static assertion failed
+          - arch: armv5l-linux-musleabi #error: ‘MLAS_FLOAT32X4’ does not name a type
+          - arch: armv5l-linux-musleabihf #error: static assertion failed
+          - arch: armv5te-linux-musleabi #error: ‘MLAS_FLOAT32X4’ does not name a type
+          - arch: armv6-linux-musleabi #error: ‘MLAS_FLOAT32X4’ does not name a type
+          - arch: armv6-linux-musleabihf #error: static assertion failed
+          - arch: armv7-linux-musleabi #error: ‘MLAS_FLOAT32X4’ does not name a type
+          - arch: armv7-linux-musleabihf #error: static assertion failed
+          - arch: armv7l-linux-musleabihf #error: static assertion failed
+          - arch: armv7m-linux-musleabi #error: ‘MLAS_FLOAT32X4’ was not declared in this scope
+          - arch: armv7r-linux-musleabihf #error: static assertion failed
+          - arch: i486-linux-musl #error: SSE vector return without SSE enabled changes the ABI
+          - arch: i586-linux-musl #error: SSE vector return without SSE enabled changes the ABI
+          - arch: i686-linux-musl #error: SSE vector return without SSE enabled changes the ABI
+          - arch: m68k-linux-musl #error: static assertion failed
+          - arch: microblazeel-linux-musl #error: static assertion failed: Platform is not 64-bit
+          - arch: microblaze-linux-musl #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: mips64el-linux-musln32 #error: static assertion failed: Platform is not 64-bit
+          - arch: mips64el-linux-musln32sf #error: static assertion failed: Platform is not 64-bit
+          - arch: mips64-linux-musl #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: mips64-linux-musln32 #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: mips64-linux-musln32sf #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: powerpc64le-linux-musl #error: there are no arguments to ‘vec_splat’ that depend on a template parameter, so a declaration of ‘vec_splat’ must be available
+          - arch: powerpc64-linux-musl #error: there are no arguments to ‘vec_splat’ that depend on a template parameter, so a declaration of ‘vec_splat’ must be available
+          - arch: powerpcle-linux-musl #error: GCC vector returned by reference: non-standard ABI extension with no compatibility guarantee
+          - arch: powerpcle-linux-muslsf #error: GCC vector returned by reference: non-standard ABI extension with no compatibility guarantee
+          - arch: powerpc-linux-musl #error: GCC vector returned by reference: non-standard ABI extension with no compatibility guarantee
+          - arch: powerpc-linux-muslsf #error: GCC vector returned by reference: non-standard ABI extension with no compatibility guarantee
 
-    name: musl-${{ matrix.arch }}
+    name: ${{ matrix.arch }}
 
     env:
       BUILD_SCRIPT: build-onnxruntime-musl.sh
-      BUILD_OPTIONS: onnxruntime_options.txt
+      BUILD_OPTIONS: onnxruntime_cmake_options.txt
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-shared
       STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-static
 
@@ -116,18 +151,18 @@ jobs:
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
           chmod a+x ${{ env.BUILD_SCRIPT }}
-          ./${{ env.BUILD_SCRIPT }} -t '${{ matrix.arch }}' -p '/opt/${{ matrix.arch }}'
+          ./${{ env.BUILD_SCRIPT }} -n '${{ matrix.arch }}' -p '/opt/${{ matrix.arch }}'
 
       # install文件夹改名linux，并使用7z压缩
       - name: 7zip shared lib
         run: |
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/install linux
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Release-${{ matrix.arch }}/install linux
           7z a ${{ env.SHARED_PKG_NAME }}.7z linux
           rm -r -f linux
 
       - name: 7zip static lib
         run: |
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/install-static linux
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Release-${{ matrix.arch }}/install-static linux
           7z a ${{ env.STATIC_PKG_NAME }}.7z linux
           rm -r -f linux
 

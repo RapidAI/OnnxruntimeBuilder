@@ -108,14 +108,14 @@ else
     exit 0
 fi
 
-while getopts "t:p:" arg; do
+while getopts "n:p:" arg; do
     case $arg in
-    t)
-        echo "t's arg:$OPTARG"
+    n)
+        echo "n's arg:$OPTARG"
         export TOOLCHAIN_NAME="$OPTARG"
         ;;
     p)
-        echo "t's arg:$OPTARG"
+        echo "p's arg:$OPTARG"
         export TOOLCHAIN_PATH="$OPTARG"
         ;;
     ?)
@@ -128,7 +128,7 @@ echo "TOOLCHAIN_NAME=$TOOLCHAIN_NAME, TOOLCHAIN_PATH=$TOOLCHAIN_PATH"
 
 if [ -z "$TOOLCHAIN_NAME" ] || [ -z "$TOOLCHAIN_PATH" ]; then
     echo -e "empty TOOLCHAIN_NAME or TOOLCHAIN_PATH."
-    echo -e "usage: ./build-onnxruntime-musl.sh -t 'aarch64-linux-musl' -p '/opt/aarch64-linux-musl'"
+    echo -e "usage: ./build-onnxruntime-musl.sh -n 'aarch64-linux-musl' -p '/opt/aarch64-linux-musl'"
     exit 1
 fi
 
