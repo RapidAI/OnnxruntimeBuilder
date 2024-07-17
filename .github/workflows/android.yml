@@ -217,7 +217,7 @@ jobs:
         with:
           prerelease: false
           bodyFile: release.md
-          artifacts: ${{ env.SHARED_PKG_NAME }}.7z,${{ env.STATIC_PKG_NAME }}.7z,${{ env.JAVA_PKG_NAME }}.7z
+          artifacts: 'onnxruntime-*.7z'
           allowUpdates: true
           artifactContentType: application/x-7z-compressed
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -131,18 +131,18 @@ jobs:
           rm -r -f linux
 
       # 上传artifact
-      - name: upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.SHARED_PKG_NAME }}
-          path: ${{ env.SHARED_PKG_NAME }}.7z
+#      - name: upload
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ${{ env.SHARED_PKG_NAME }}
+#          path: ${{ env.SHARED_PKG_NAME }}.7z
 
-      # 上传artifact
-      - name: upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.STATIC_PKG_NAME }}
-          path: ${{ env.STATIC_PKG_NAME }}.7z
+#      - name: upload
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ${{ env.STATIC_PKG_NAME }}
+#          path: ${{ env.STATIC_PKG_NAME }}.7z
+
       # 获取所有的git log和tag
       - name: Unshallow
         run: git fetch --prune --unshallow
@@ -171,7 +171,7 @@ jobs:
         with:
           prerelease: false
           bodyFile: release.md
-          artifacts: ${{ env.SHARED_PKG_NAME }}.7z, ${{ env.STATIC_PKG_NAME }}.7z
+          artifacts: 'onnxruntime-*.7z'
           allowUpdates: true
           artifactContentType: application/x-7z-compressed
           token: ${{ secrets.GITHUB_TOKEN }}
