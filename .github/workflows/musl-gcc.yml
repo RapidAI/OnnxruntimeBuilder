@@ -14,7 +14,7 @@ jobs:
           - { onnx: v1.18.0, musl: 13.2.0 }
         arch:
           [
-            aarch64-linux-musl,
+            aarch64-linux-musl, #OK
             aarch64_be-linux-musl,
             arm-linux-musleabi,
             arm-linux-musleabihf,
@@ -44,13 +44,13 @@ jobs:
             mips64-linux-musl,
             mips64-linux-musln32,
             mips64-linux-musln32sf,
-            mips64el-linux-musl,
+            mips64el-linux-musl, #OK
             mips64el-linux-musln32,
             mips64el-linux-musln32sf,
-            mipsel-linux-musl,
-            mipsel-linux-musln32,
-            mipsel-linux-musln32sf,
-            mipsel-linux-muslsf,
+            mipsel-linux-musl, #OK
+            mipsel-linux-musln32, #OK
+            mipsel-linux-musln32sf, #OK
+            mipsel-linux-muslsf, #OK
             or1k-linux-musl,
             powerpc-linux-musl,
             powerpc-linux-muslsf,
@@ -58,15 +58,15 @@ jobs:
             powerpc64le-linux-musl,
             powerpcle-linux-musl,
             powerpcle-linux-muslsf,
-            riscv32-linux-musl,
-            riscv64-linux-musl,
+            riscv32-linux-musl, #OK
+            riscv64-linux-musl, #OK
             s390x-linux-musl,
-            sh2-linux-musl,
+            sh2-linux-musl, #OK
             sh2eb-linux-musl,
             sh4-linux-musl,
             sh4eb-linux-musl,
-            x86_64-linux-musl,
-            x86_64-linux-muslx32,
+            x86_64-linux-musl, #OK
+            x86_64-linux-muslx32, #OK
           ]
         exclude:
           - arch: aarch64_be-linux-musl #error: static assertion failed: ORT format only supports little-endian machines
@@ -103,6 +103,14 @@ jobs:
           - arch: powerpcle-linux-muslsf #error: GCC vector returned by reference: non-standard ABI extension with no compatibility guarantee
           - arch: powerpc-linux-musl #error: GCC vector returned by reference: non-standard ABI extension with no compatibility guarantee
           - arch: powerpc-linux-muslsf #error: GCC vector returned by reference: non-standard ABI extension with no compatibility guarantee
+          - arch: mips-linux-musl #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: mips-linux-muslsf #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: mips-linux-musln32sf #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: or1k-linux-musl #error: static assertion failed: Platform is not 64-bit
+          - arch: s390x-linux-musl #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: sh2eb-linux-musl #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: sh4-linux-musl #error: unable to find a register to spill in class ‘R0_REGS’
+          - arch: sh4eb-linux-musl #error: static assertion failed: ORT format only supports little-endian machines
 
     name: ${{ matrix.arch }}
 
