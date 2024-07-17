@@ -1,17 +1,17 @@
-name: musl
+name: musl-gcc
 
 on:
   workflow_dispatch:
 
 jobs:
   musl-cross-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.18.0, musl: 11.3.1 }
+          - { onnx: v1.18.0, musl: 13.2.0 }
         arch:
           [
             aarch64-linux-musl,
@@ -24,13 +24,17 @@ jobs:
             armel-linux-musleabihf,
             armv5l-linux-musleabi,
             armv5l-linux-musleabihf,
+            armv5te-linux-musleabi,
             armv6-linux-musleabi,
             armv6-linux-musleabihf,
+            armv7-linux-musleabi,
+            armv7-linux-musleabihf,
             armv7l-linux-musleabihf,
             armv7m-linux-musleabi,
             armv7r-linux-musleabihf,
             i486-linux-musl,
             i686-linux-musl,
+            i586-linux-musl,
             m68k-linux-musl,
             microblaze-linux-musl,
             microblazeel-linux-musl,
@@ -58,9 +62,7 @@ jobs:
             riscv64-linux-musl,
             s390x-linux-musl,
             sh2-linux-musl,
-            sh2-linux-muslfdpic,
             sh2eb-linux-musl,
-            sh2eb-linux-muslfdpic,
             sh4-linux-musl,
             sh4eb-linux-musl,
             x86_64-linux-musl,
@@ -71,7 +73,7 @@ jobs:
 
     env:
       BUILD_SCRIPT: build-onnxruntime-musl.sh
-      BUILD_OPTIONS: onnxruntime_options-${{ matrix.ver.onnx }}.txt
+      BUILD_OPTIONS: onnxruntime_options.txt
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-shared
       STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-static
 
@@ -106,6 +108,7 @@ jobs:
         run: |
           cp ${{ env.BUILD_SCRIPT }} onnxruntime-${{ matrix.ver.onnx }}
           cp ${{ env.BUILD_OPTIONS }} onnxruntime-${{ matrix.ver.onnx }}
+          cp -r patches onnxruntime-${{ matrix.ver.onnx }}/
           wget https://github.com/benjaminwan/musl-cross-builder/raw/main/musl-cross.toolchain.cmake -O musl-cross.toolchain.cmake
           cp musl-cross.toolchain.cmake onnxruntime-${{ matrix.ver.onnx }}
 
@@ -113,14 +116,17 @@ jobs:
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
           chmod a+x ${{ env.BUILD_SCRIPT }}
-          ./${{ env.BUILD_SCRIPT }} ${{ matrix.arch }} /opt/${{ matrix.arch }}
+          ./${{ env.BUILD_SCRIPT }} -t '${{ matrix.arch }}' -p '/opt/${{ matrix.arch }}'
 
       # install文件夹改名linux，并使用7z压缩
-      - name: 7zip
+      - name: 7zip shared lib
         run: |
           cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/install linux
           7z a ${{ env.SHARED_PKG_NAME }}.7z linux
           rm -r -f linux
+
+      - name: 7zip static lib
+        run: |
           cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/install-static linux
           7z a ${{ env.STATIC_PKG_NAME }}.7z linux
           rm -r -f linux

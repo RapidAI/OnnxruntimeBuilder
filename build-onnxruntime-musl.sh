@@ -1,96 +1,154 @@
 #!/bin/bash
 # build onnxruntime by benjaminwan
-# CMakeFiles/onnxruntime.dir/link.txt/link/lib*.a
 
-function collectLibs() {
-  # shared lib
-  cmake --build . --config Release --target install
-#  rm -r -f install/bin
-  mv install/include/onnxruntime/* install/include
-  rm -rf install/include/onnxruntime
-  echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" > install/OnnxRuntimeConfig.cmake
-  echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >> install/OnnxRuntimeConfig.cmake
-  echo "link_directories(\${CMAKE_CURRENT_LIST_DIR}/lib)" >> install/OnnxRuntimeConfig.cmake
-  echo "set(OnnxRuntime_LIBS onnxruntime)" >> install/OnnxRuntimeConfig.cmake
-
-  # static lib
-  mkdir -p install-static/lib
-  cp -r install/include install-static
-  all_link=$(cat CMakeFiles/onnxruntime.dir/link.txt)
-  link=${all_link#*onnxruntime.dir}
-  regex="lib.*.a$"
-  libs=""
-  for var in $link; do
-    if [[ ${var} =~ ${regex} ]]; then
-      echo cp ${var} install-static/lib
-      cp ${var} install-static/lib
-      name=$(echo $var | grep -E ${regex} -o)
-      name=${name#lib}
-      name=${name%.a}
-      libs="${libs} ${name}"
+function is_cmd_exist() {
+    retval=""
+    if ! command -v $1 >/dev/null 2>&1; then
+        retval="false"
+    else
+        retval="true"
     fi
-  done
-  echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" > install-static/OnnxRuntimeConfig.cmake
-  echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >> install-static/OnnxRuntimeConfig.cmake
-  echo "link_directories(\${CMAKE_CURRENT_LIST_DIR}/lib)" >> install-static/OnnxRuntimeConfig.cmake
-  echo "set(OnnxRuntime_LIBS $libs)" >> install-static/OnnxRuntimeConfig.cmake
-  cp CMakeFiles/onnxruntime.dir/link.txt install-static/link.log
+    echo "$retval"
 }
 
-function cmakeBuild() {
-  mkdir -p "build-$sysOS"
-  pushd "build-$sysOS"
+function collect_shared_lib() {
+    if [ -d "install/bin" ]; then
+        rm -r -f install/bin
+    fi
 
-#  mkdir -p "host_protoc"
-#  pushd "host_protoc"
-#  cmake -Dprotobuf_BUILD_TESTS=OFF \
-#  -Dprotobuf_WITH_ZLIB_DEFAULT=OFF \
-#  -Dprotobuf_BUILD_SHARED_LIBS=OFF \
-#  ../../cmake/external/protobuf/cmake
-#  cmake --build . -j $NUM_THREADS --config Release --target protoc
-#  popd
-#  BUILD_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  cmake -DCMAKE_BUILD_TYPE=$1 \
-    -DCMAKE_TOOLCHAIN_FILE=../musl-cross.toolchain.cmake \
-    -DCMAKE_INSTALL_PREFIX=install \
-    -DCMAKE_C_FLAGS="-DNDEBUG -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fstack-protector-strong -O3 -pipe -fstack-clash-protection -fcf-protection" \
-    -DCMAKE_CXX_FLAGS="-DNDEBUG -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fstack-protector-strong -O3 -pipe -fstack-clash-protection -fcf-protection" \
-    -DCMAKE_EXE_LINKER_FLAGS_INIT="-Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,--strip-all" \
-    -DCMAKE_MODULE_LINKER_FLAGS_INIT="-Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,--strip-all" \
-    -DCMAKE_SHARED_LINKER_FLAGS_INIT="-Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,--strip-all" \
-    $(cat ../onnxruntime_options-v1.17.0.txt) \
-    ../cmake
-  cmake --build . -j $NUM_THREADS
-  cmake --build . --target install
-  collectLibs
-  popd
+    if [ -d "install/include/onnxruntime" ]; then
+        mv install/include/onnxruntime/* install/include
+        rm -rf install/include/onnxruntime
+    fi
+
+    echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" >install/OnnxRuntimeConfig.cmake
+    echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >>install/OnnxRuntimeConfig.cmake
+    echo "link_directories(\${CMAKE_CURRENT_LIST_DIR}/lib)" >>install/OnnxRuntimeConfig.cmake
+    echo "set(OnnxRuntime_LIBS onnxruntime)" >>install/OnnxRuntimeConfig.cmake
 }
 
-sysOS=$(uname -s)
+function copy_libs() {
+    all_link=$(cat CMakeFiles/onnxruntime.dir/link.txt)
+    link=${all_link#*onnxruntime.dir}
+    regex="lib.*.a$"
+    libs=""
+    for var in $link; do
+        if [[ ${var} =~ ${regex} ]]; then
+            #echo cp ${var} install-static/lib
+            cp ${var} install-static/lib
+            name=$(echo $var | grep -E ${regex} -o)
+            name=${name#lib}
+            name=${name%.a}
+            libs="${libs} ${name}"
+        fi
+    done
+    echo "$libs"
+}
+
+function combine_libs_linux() {
+    all_link=$(cat CMakeFiles/onnxruntime.dir/link.txt)
+    link=${all_link#*onnxruntime.dir}
+    regex="lib.*.a$"
+    root_path="${PWD}"
+    static_path="${PWD}/install-static"
+    lib_path="${PWD}/install-static/lib"
+    mkdir -p $lib_path
+    echo "create ${lib_path}/libonnxruntime.a" >${static_path}/libonnxruntime.mri
+    for var in $link; do
+        if [[ ${var} =~ ${regex} ]]; then
+            echo "addlib ${root_path}/${var}" >>${static_path}/libonnxruntime.mri
+        fi
+    done
+    echo "save" >>${static_path}/libonnxruntime.mri
+    echo "end" >>${static_path}/libonnxruntime.mri
+    $TOOLCHAIN_NAME-ar -M <${static_path}/libonnxruntime.mri
+}
+
+function collect_static_libs() {
+    if [ -d "install-static" ]; then
+        rm -r -f install-static
+    fi
+    mkdir -p install-static/lib
+
+    if [ -d "install/include" ]; then
+        cp -r install/include install-static
+    fi
+
+    if [ ! -f "CMakeFiles/onnxruntime.dir/link.txt" ]; then
+        echo "link.txt is not exist, collect static libs error."
+        exit 0
+    fi
+
+    ar_exist=$(is_cmd_exist $TOOLCHAIN_NAME-ar)
+    if [ "$ar_exist" == "true" ]; then
+        echo "combine_libs_linux"
+        combine_libs_linux
+        libs="onnxruntime"
+    else
+        echo "copy_libs"
+        libs=$(copy_libs)
+    fi
+
+    echo "set(OnnxRuntime_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")" >install-static/OnnxRuntimeConfig.cmake
+    echo "include_directories(\${OnnxRuntime_INCLUDE_DIRS})" >>install-static/OnnxRuntimeConfig.cmake
+    echo "link_directories(\${CMAKE_CURRENT_LIST_DIR}/lib)" >>install-static/OnnxRuntimeConfig.cmake
+    echo "set(OnnxRuntime_LIBS $libs)" >>install-static/OnnxRuntimeConfig.cmake
+
+    cp CMakeFiles/onnxruntime.dir/link.txt install-static/link.log
+}
+
+HOST_OS=$(uname -s)
 NUM_THREADS=1
+BUILD_TYPE=Release
 
-if [ $sysOS == "Darwin" ]; then
-  NUM_THREADS=$(sysctl -n hw.ncpu)
-elif [ $sysOS == "Linux" ]; then
-  NUM_THREADS=$(nproc)
+if [ $HOST_OS == "Linux" ]; then
+    NUM_THREADS=$(nproc)
 else
-  echo "Other OS: $sysOS"
-  exit 0
+    echo "Unsupport OS: $HOST_OS"
+    exit 0
 fi
 
-if [ "$1" ] && [ "$2" ]; then
-  echo "TOOLCHAIN_NAME=$1"
-  echo "TOOLCHAIN_PATH=$2"
-  export TOOLCHAIN_NAME="$1"
-  export TOOLCHAIN_PATH="$2"
-else
-  echo "must input TOOLCHAIN_NAME TOOLCHAIN_PATH x86_64-linux-musl /opt/x86_64-linux-musl"
-  exit 0
+while getopts "t:p:" arg; do
+    case $arg in
+    t)
+        echo "t's arg:$OPTARG"
+        export TOOLCHAIN_NAME="$OPTARG"
+        ;;
+    p)
+        echo "t's arg:$OPTARG"
+        export TOOLCHAIN_PATH="$OPTARG"
+        ;;
+    ?)
+        echo -e "unkonw argument."
+        exit 1
+        ;;
+    esac
+done
+echo "TOOLCHAIN_NAME=$TOOLCHAIN_NAME, TOOLCHAIN_PATH=$TOOLCHAIN_PATH"
+
+if [ -z "$TOOLCHAIN_NAME" ] || [ -z "$TOOLCHAIN_PATH" ]; then
+    echo -e "empty TOOLCHAIN_NAME or TOOLCHAIN_PATH."
+    echo -e "usage: ./build-onnxruntime-musl.sh -t 'aarch64-linux-musl' -p '/opt/aarch64-linux-musl'"
+    exit 1
 fi
 
-# 1st sync submodule
-# git submodule sync --recursive
-# git submodule update --init --recursive
+export PATH=$TOOLCHAIN_PATH/bin:$PATH
 
+mkdir -p "build-$BUILD_TYPE-$TOOLCHAIN_NAME"
+pushd "build-$BUILD_TYPE-$TOOLCHAIN_NAME" || exit
+cmake ../cmake \
+    $(cat ../onnxruntime_cmake_options.txt) \
+    -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+    -DCMAKE_INSTALL_PREFIX=install \
+    -DCMAKE_TOOLCHAIN_FILE=../musl-cross.toolchain.cmake
+patch -p0 -i ../patches/onnxruntime-1.18.0-musl.patch
+cmake --build . --config $BUILD_TYPE -j $NUM_THREADS
+cmake --build . --config $BUILD_TYPE --target install
 
-cmakeBuild "Release"
+if [ ! -d "install" ]; then
+    echo "Cmake install  error!"
+    exit 0
+fi
+collect_shared_lib
+collect_static_libs
+popd
