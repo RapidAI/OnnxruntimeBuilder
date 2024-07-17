@@ -137,30 +137,30 @@ jobs:
           fi
 
       # 上传artifact
-      - name: upload shared lib
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.SHARED_PKG_NAME }}
-          path: ${{ env.SHARED_PKG_NAME }}.7z
+#      - name: upload shared lib
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ${{ env.SHARED_PKG_NAME }}
+#          path: ${{ env.SHARED_PKG_NAME }}.7z
 
-      - name: upload static lib
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.STATIC_PKG_NAME }}
-          path: ${{ env.STATIC_PKG_NAME }}.7z
+#      - name: upload static lib
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ${{ env.STATIC_PKG_NAME }}
+#          path: ${{ env.STATIC_PKG_NAME }}.7z
 
-      - name: Check file existence
-        id: check_java_7z
-        uses: andstor/file-existence-action@v3
-        with:
-          files: "${{ env.JAVA_PKG_NAME }}.7z"
+#      - name: Check file existence
+#        id: check_java_7z
+#        uses: andstor/file-existence-action@v3
+#        with:
+#          files: "${{ env.JAVA_PKG_NAME }}.7z"
 
-      - name: upload java lib
-        if: steps.check_java_7z.outputs.files_exists == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.JAVA_PKG_NAME }}
-          path: ${{ env.JAVA_PKG_NAME }}.7z
+#      - name: upload java lib
+#        if: steps.check_java_7z.outputs.files_exists == 'true'
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ${{ env.JAVA_PKG_NAME }}
+#          path: ${{ env.JAVA_PKG_NAME }}.7z
 
       # 获取所有的git log和tag
       - name: Unshallow
