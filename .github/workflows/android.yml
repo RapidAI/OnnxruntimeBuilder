@@ -57,11 +57,11 @@ jobs:
         run: gradle --version
 
       # 检出代码
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # 检出onnxruntime
       - name: checkout onnxruntime
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: microsoft/onnxruntime
           path: onnxruntime-${{ matrix.ver.onnx }}
@@ -140,7 +140,7 @@ jobs:
 
     steps:
       # 检出代码
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # 获取所有的git log和tag
       - name: Unshallow
