@@ -60,8 +60,8 @@ jobs:
           ref: ${{ matrix.ver.onnx }}
           submodules: recursive
 
-      # 复制编译脚本
-      - name: copy build script
+      # 复制
+      - name: copy
         run: |
           cp ${{ env.BUILD_SCRIPT }} onnxruntime-${{ matrix.ver.onnx }}
           cp Launch-VsDevShell.ps1 onnxruntime-${{ matrix.ver.onnx }}
@@ -81,6 +81,7 @@ jobs:
           .\${{ env.BUILD_SCRIPT }} -VsArch x86 -VsVer ${{ matrix.list.vs_ver }} -VsCRT ${{ matrix.crt }} 
 
       - name: build arm64
+        if: ${{ (matrix.list.vs_name == 'vs2019') || (matrix.list.vs_name == 'vs2022') }}
         shell: powershell
         run: |
           cd onnxruntime-${{ matrix.ver.onnx }}
@@ -146,28 +147,28 @@ jobs:
 
     steps:
       # 检出代码
-      - uses: actions/checkout@v4
+#      - uses: actions/checkout@v4
 
       # 获取所有的git log和tag
-      - name: Unshallow
-        run: git fetch --prune --unshallow
+#      - name: Unshallow
+#        run: git fetch --prune --unshallow
 
       # 获取git log 从 previousTag 到 lastTag
-      - name: Get git log
-        id: git-log
-        run: |
-          previousTag=$(git describe --abbrev=0 --tags `git rev-list --tags --skip=1 --max-count=1`)
-          lastTag=$(git describe --abbrev=0 --tags)
-          echo "previousTag:$previousTag ~ lastTag:$lastTag"
-          log=$(git log $previousTag..$lastTag --pretty=format:'- %cd %an: %s\n' --date=format:'%Y-%m-%d %H:%M:%S')
-          echo "$log"
-          echo "log_state="$log"" >> $GITHUB_ENV
+#      - name: Get git log
+#        id: git-log
+#        run: |
+#          previousTag=$(git describe --abbrev=0 --tags `git rev-list --tags --skip=1 --max-count=1`)
+#          lastTag=$(git describe --abbrev=0 --tags)
+#          echo "previousTag:$previousTag ~ lastTag:$lastTag"
+#          log=$(git log $previousTag..$lastTag --pretty=format:'- %cd %an: %s\n' --date=format:'%Y-%m-%d %H:%M:%S')
+#          echo "$log"
+#          echo "log_state="$log"" >> $GITHUB_ENV
 
       # 创建Changelog文件 triggered by git tag push
-      - name: Generate Changelog
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          echo -e '${{ env.log_state }}' > release.md
+#      - name: Generate Changelog
+#        if: startsWith(github.ref, 'refs/tags/')
+#        run: |
+#          echo -e '${{ env.log_state }}' > release.md
 
       # 下载artifact
       - name: download

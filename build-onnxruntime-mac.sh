@@ -102,16 +102,16 @@ BUILD_TYPE=Release
 if [ $HOST_OS == "Darwin" ]; then
     NUM_THREADS=$(sysctl -n hw.ncpu)
 else
-    echo "Unsupport OS: $HOST_OS"
+    echo "Unsupported OS: $HOST_OS"
     exit 0
 fi
 
 JAVA_FLAG=""
 
-while getopts "a:j" arg; do
+while getopts "n:j" arg; do
     case $arg in
-    a)
-        echo "a's arg:$OPTARG"
+    n)
+        echo "n's arg:$OPTARG"
         TARGET_ARCH=$OPTARG
         ;;
     j)
@@ -119,7 +119,9 @@ while getopts "a:j" arg; do
         JAVA_FLAG="--build_java"
         ;;
     ?)
-        echo -e "unkonw argument. \nuseage1: ./build-onnxruntim-mac.bat -a x86_64 \nuseage2: ./build-onnxruntim-mac.bat -a arm64"
+        echo -e "unknown argument."
+        echo -e "usage 1: ./build-onnxruntim-mac.bat -n x86_64"
+        echo -e "usage 2: ./build-onnxruntim-mac.bat -n arm64"
         exit 1
         ;;
     esac
