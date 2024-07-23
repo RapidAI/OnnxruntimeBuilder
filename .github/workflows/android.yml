@@ -129,7 +129,7 @@ jobs:
 
     steps:
       # 检出代码
-#      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       # 获取所有的git log和tag
 #      - name: Unshallow
