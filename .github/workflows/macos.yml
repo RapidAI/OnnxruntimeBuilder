@@ -23,6 +23,7 @@ jobs:
           ]
 
     runs-on: macos-${{ matrix.list.os_ver }}
+    name: macos-${{ matrix.list.os_ver }}-${{ matrix.arch }}
 
     env:
       BUILD_SCRIPT: build-onnxruntime-mac.sh
