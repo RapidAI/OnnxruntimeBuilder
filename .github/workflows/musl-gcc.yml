@@ -112,6 +112,7 @@ jobs:
           - arch: sh2eb-linux-musl #error: static assertion failed: ORT format only supports little-endian machines
           - arch: sh4-linux-musl #error: unable to find a register to spill in class ‘R0_REGS’
           - arch: sh4eb-linux-musl #error: static assertion failed: ORT format only supports little-endian machines
+          - arch: loongarch64-linux-musl #error: unrecognized command-line option ‘-mlsx’
 
     name: ${{ matrix.arch }}
 
