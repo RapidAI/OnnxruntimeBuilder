@@ -77,15 +77,15 @@ jobs:
       # install文件夹改名macos，并使用7z压缩
       - name: 7z shared lib
         run: |
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin-${{ matrix.arch }}/Release/install macos
-          7z a ${{ env.SHARED_PKG_NAME }}.7z macos
-          rm -r -f macos
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin-${{ matrix.arch }}/Release/install ${{ env.SHARED_PKG_NAME }}
+          7z a ${{ env.SHARED_PKG_NAME }}.7z ${{ env.SHARED_PKG_NAME }}
+          rm -r -f ${{ env.SHARED_PKG_NAME }}
 
       - name: 7z static lib
         run: |
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin-${{ matrix.arch }}/Release/install-static macos
-          7z a ${{ env.STATIC_PKG_NAME }}.7z macos
-          rm -r -f macos
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin-${{ matrix.arch }}/Release/install-static ${{ env.STATIC_PKG_NAME }}
+          7z a ${{ env.STATIC_PKG_NAME }}.7z ${{ env.STATIC_PKG_NAME }}
+          rm -r -f ${{ env.STATIC_PKG_NAME }}
 
       - name: build java
         run: |
@@ -98,6 +98,7 @@ jobs:
           if [ -d "onnxruntime-${{ matrix.ver.onnx }}/build-Darwin-${{ matrix.arch }}/Release/java/build/libs" ]; then
             cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Darwin-${{ matrix.arch }}/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
             7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
+            rm -r -f ${{ env.JAVA_PKG_NAME }}
           fi
 
       # 上传artifact

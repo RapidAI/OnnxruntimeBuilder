@@ -120,6 +120,7 @@ jobs:
       BUILD_OPTIONS: onnxruntime_cmake_options.txt
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-shared
       STATIC_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-${{ matrix.arch }}-static
+      MUSL_NAME: ${{ matrix.arch }}-${{ matrix.ver.musl }}
 
     steps:
       # 检出代码
@@ -128,9 +129,10 @@ jobs:
       # 部署musl
       - name: deploy musl gcc
         run: |
-          wget https://github.com/benjaminwan/musl-cross-builder/releases/download/${{ matrix.ver.musl }}/${{ matrix.arch }}-${{ matrix.ver.musl }}.7z -O ${{ matrix.arch }}.7z
+          wget https://github.com/benjaminwan/musl-cross-builder/releases/download/${{ matrix.ver.musl }}/${{ env.MUSL_NAME }}.7z -O ${{ matrix.arch }}.7z
           7z x ${{ matrix.arch }}.7z -aoa
-          mv ${{ matrix.arch }}/ /opt/${{ matrix.arch }}/
+          mv ${{ matrix.arch }}/ /opt/
+          echo "/opt/${{ matrix.arch }}" >> $GITHUB_PATH
 
       # 检出onnxruntime
       - name: checkout onnxruntime
@@ -165,15 +167,15 @@ jobs:
       # install文件夹改名linux，并使用7z压缩
       - name: 7zip shared lib
         run: |
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Release-${{ matrix.arch }}/install linux
-          7z a ${{ env.SHARED_PKG_NAME }}.7z linux
-          rm -r -f linux
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Release-${{ matrix.arch }}/install ${{ env.SHARED_PKG_NAME }}
+          7z a ${{ env.SHARED_PKG_NAME }}.7z ${{ env.SHARED_PKG_NAME }}
+          rm -r -f ${{ env.SHARED_PKG_NAME }}
 
       - name: 7zip static lib
         run: |
-          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Release-${{ matrix.arch }}/install-static linux
-          7z a ${{ env.STATIC_PKG_NAME }}.7z linux
-          rm -r -f linux
+          cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Release-${{ matrix.arch }}/install-static ${{ env.STATIC_PKG_NAME }}
+          7z a ${{ env.STATIC_PKG_NAME }}.7z ${{ env.STATIC_PKG_NAME }}
+          rm -r -f ${{ env.STATIC_PKG_NAME }}
 
       # 上传artifact
 #      - name: upload shared lib
