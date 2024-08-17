@@ -10,6 +10,7 @@
 -Donnxruntime_BUILD_APPLE_FRAMEWORK=OFF
 -Donnxruntime_USE_DNNL=OFF
 -Donnxruntime_USE_NNAPI_BUILTIN=OFF
+-Donnxruntime_USE_VSINPU=OFF
 -Donnxruntime_USE_RKNPU=OFF
 -Donnxruntime_USE_LLVM=OFF
 -Donnxruntime_ENABLE_MICROSOFT_INTERNAL=OFF
@@ -28,7 +29,6 @@
 -Donnxruntime_EXTENDED_MINIMAL_BUILD=OFF
 -Donnxruntime_MINIMAL_BUILD_CUSTOM_OPS=OFF
 -Donnxruntime_REDUCED_OPS_BUILD=OFF
--Donnxruntime_ENABLE_LANGUAGE_INTEROP_OPS=OFF
 -Donnxruntime_USE_DML=OFF
 -Donnxruntime_USE_WINML=OFF
 -Donnxruntime_BUILD_MS_EXPERIMENTAL_OPS=OFF
@@ -52,7 +52,7 @@
 -Donnxruntime_USE_NCCL=OFF
 -Donnxruntime_BUILD_BENCHMARKS=OFF
 -Donnxruntime_USE_ROCM=OFF
--DOnnxruntime_GCOV_COVERAGE=OFF
+-Donnxruntime_GCOV_COVERAGE=OFF
 -Donnxruntime_USE_MPI=OFF
 -Donnxruntime_ENABLE_MEMORY_PROFILE=OFF
 -Donnxruntime_ENABLE_CUDA_LINE_NUMBER_INFO=OFF
