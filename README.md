@@ -48,6 +48,9 @@
 - 必须选择一致的工具链版本来编译bin文件;
 - 工具链可以从此处获得https://github.com/benjaminwan/musl-cross-builder
 
+### 如果7z包解压出错
+- 需要安装最新版的7zip工具，https://www.7-zip.org/download.html
+
 ### 关于OpenMP
 
 - [官方v1.7.0版本说明](https://github.com/microsoft/onnxruntime/releases/tag/v1.7.0)
