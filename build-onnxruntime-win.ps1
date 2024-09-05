@@ -96,7 +96,7 @@ function CollectLibs
     Remove-Item -Path "install\*test*.exe" -Force -Recurse
 
     # 复制 install\include\onnxruntime 目录下的所有文件到 install\include
-    Copy-Item -Path "install\include\onnxruntime\*" -Destination "install\include" -Recurse
+    Copy-Item -Path "install\include\onnxruntime\*" -Destination "install\include" -Force -Recurse
 
     # 删除 install\include\onnxruntime 目录
     Remove-Item -Path "install\include\onnxruntime" -Force -Recurse
