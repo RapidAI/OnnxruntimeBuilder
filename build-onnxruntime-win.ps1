@@ -178,33 +178,18 @@ switch ($VsArch)
 {
     x64 {
         $VsArchFlag = ''
+        $ArmFlag = ''
     }
     x86 {
         $VsArchFlag = '--x86'
+        $ArmFlag = ''
     }
     arm64 {
         $VsArchFlag = '--arm64'
-    }
-    arm64ec {
-        $VsArchFlag = '--arm64ec'
-    }
-    default {
-        exit
-    }
-}
-
-switch ($VsArch)
-{
-    x64 {
-        $ArmFlag = ''
-    }
-    x86 {
-        $ArmFlag = ''
-    }
-    arm64 {
         $ArmFlag = '--buildasx'
     }
     arm64ec {
+        $VsArchFlag = '--arm64ec'
         $ArmFlag = '--buildasx'
     }
     default {
