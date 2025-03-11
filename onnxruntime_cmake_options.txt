@@ -1,5 +1,7 @@
+--compile-no-warning-as-error 
 -Donnxruntime_RUN_ONNX_TESTS=OFF
 -Donnxruntime_GENERATE_TEST_REPORTS=ON
+-Donnxruntime_USE_VCPKG=OFF
 -Donnxruntime_USE_MIMALLOC=OFF
 -Donnxruntime_ENABLE_PYTHON=OFF
 -Donnxruntime_BUILD_CSHARP=OFF
@@ -35,15 +37,11 @@
 -Donnxruntime_USE_TELEMETRY=OFF
 -Donnxruntime_ENABLE_LTO=OFF
 -Donnxruntime_USE_ACL=OFF
--Donnxruntime_USE_ACL_1902=OFF
--Donnxruntime_USE_ACL_1905=OFF
--Donnxruntime_USE_ACL_1908=OFF
--Donnxruntime_USE_ACL_2002=OFF
--Donnxruntime_USE_ACL_2308=OFF
 -Donnxruntime_USE_ARMNN=OFF
 -Donnxruntime_ARMNN_RELU_USE_CPU=ON
 -Donnxruntime_ARMNN_BN_USE_CPU=ON
 -Donnxruntime_USE_JSEP=OFF
+-Donnxruntime_USE_WEBGPU=OFF
 -Donnxruntime_ENABLE_NVTX_PROFILE=OFF
 -Donnxruntime_ENABLE_TRAINING=OFF
 -Donnxruntime_ENABLE_TRAINING_OPS=OFF
