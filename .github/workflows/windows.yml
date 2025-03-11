@@ -179,7 +179,7 @@ jobs:
       - name: upload-windows
         uses: ncipollo/release-action@v1
         with:
-          prerelease: false
+          prerelease: true
           bodyFile: release.md
           artifacts: artifacts/*/*.7z
           allowUpdates: true

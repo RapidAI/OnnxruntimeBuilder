@@ -223,7 +223,7 @@ jobs:
       - name: Create release and upload-archive
         uses: ncipollo/release-action@v1
         with:
-          prerelease: false
+          prerelease: true
           bodyFile: release.md
           artifacts: 'onnxruntime-*.7z'
           allowUpdates: true
