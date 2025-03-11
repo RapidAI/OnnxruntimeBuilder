@@ -24,6 +24,8 @@ jobs:
             ppc64le,
           ]
         exclude:
+          - list: { os_ver: 20.04, os_id: focal }
+            arch: arm64
           - arch: ppc64le
 
     name: ${{ matrix.os_name }}-${{ matrix.list.os_ver }}-${{ matrix.arch }}
