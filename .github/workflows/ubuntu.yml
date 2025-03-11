@@ -119,12 +119,16 @@ jobs:
       # install文件夹改名linux，并使用7z压缩
       - name: 7zip shared lib
         run: |
+          sudo chown -R $(id -u):$(id -g) onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/install
+          sudo chmod -R 755 onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/install
           cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/install ${{ env.SHARED_PKG_NAME }}
           7z a ${{ env.SHARED_PKG_NAME }}.7z ${{ env.SHARED_PKG_NAME }}
           rm -r -f ${{ env.SHARED_PKG_NAME }}
 
       - name: 7zip static lib
         run: |
+          sudo chown -R $(id -u):$(id -g) onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/install-static
+          sudo chmod -R 755 onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/install-static
           cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/install-static ${{ env.STATIC_PKG_NAME }}
           7z a ${{ env.STATIC_PKG_NAME }}.7z ${{ env.STATIC_PKG_NAME }}
           rm -r -f ${{ env.STATIC_PKG_NAME }}
@@ -136,6 +140,8 @@ jobs:
       - name: 7zip java lib
         run: |
           if [ -d "onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/java/build/libs" ]; then
+            sudo chown -R $(id -u):$(id -g) onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/java/build/libs
+            sudo chmod -R 755 onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/java/build/libs
             cp -r onnxruntime-${{ matrix.ver.onnx }}/build-Linux/Release/java/build/libs ${{ env.JAVA_PKG_NAME }}
             7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ env.JAVA_PKG_NAME }}
             rm -r -f ${{ env.JAVA_PKG_NAME }}
