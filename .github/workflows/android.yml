@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.21.0, ndk: 26.1.10909125, python: 3.10.11, jdk: 17, gradle: 8.6 }
+          - { onnx: v1.21.1, ndk: 26.1.10909125, python: 3.10.11, jdk: 17, gradle: 8.6 }
         list:
           - { arch: armeabi-v7a, min: 19 }
           - { arch: arm64-v8a, min: 21 }
@@ -120,7 +120,7 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.21.0 }
+          - { onnx: v1.21.1 }
 
     env:
       SHARED_PKG_NAME: onnxruntime-${{ matrix.ver.onnx }}-android-shared

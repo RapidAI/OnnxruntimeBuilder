@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         ver:
-          - { onnx: v1.21.0, python: 3.8.10, jdk: 11, gradle: 8.6 }
+          - { onnx: v1.21.1, python: 3.10.11, jdk: 11, gradle: 8.6 }
         list:
           - { os_ver: 12, java: 8 }
           - { os_ver: 13, java: 8 }

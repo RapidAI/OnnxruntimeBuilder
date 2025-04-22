@@ -10,7 +10,7 @@ set shell := ["powershell", "-c"]
 # Set shell for Windows OSs:
 set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 
-onnx := "v1.21.0"
+onnx := "v1.21.1"
 vs := "vs2022"
 
 default:
