@@ -134,7 +134,6 @@ fi
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 python3 $DIR/tools/ci_build/build.py --build_dir $DIR/build-$HOST_OS-$TARGET_ARCH \
---allow_running_as_root \
 --config $BUILD_TYPE \
 --parallel "$NUM_THREADS" \
 --skip_tests \
