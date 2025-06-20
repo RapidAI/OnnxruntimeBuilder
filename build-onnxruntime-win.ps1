@@ -103,7 +103,7 @@ function CollectLibs
 
     # 创建 install/OnnxRuntimeConfig.cmake 文件，并写入相关内容
     Set-Content -Path "install/OnnxRuntimeConfig.cmake" -Value "set(OnnxRuntime_INCLUDE_DIRS `${CMAKE_CURRENT_LIST_DIR}/include`)"
-    Add-Content -Path "install/OnnxRuntimeConfig.cmake" -Value "include_directories(${OnnxRuntime_INCLUDE_DIRS})"
+    Add-Content -Path "install/OnnxRuntimeConfig.cmake" -Value "include_directories(`${OnnxRuntime_INCLUDE_DIRS}`)"
     Add-Content -Path "install/OnnxRuntimeConfig.cmake" -Value "link_directories(`${CMAKE_CURRENT_LIST_DIR}/lib`)"
     Add-Content -Path "install/OnnxRuntimeConfig.cmake" -Value "set(OnnxRuntime_LIBS onnxruntime)"
 
@@ -150,13 +150,13 @@ function CollectLibs
 
     # 创建 install-static\OnnxRuntimeConfig.cmake 文件，并写入相关内容
     Set-Content -Path "install-static\OnnxRuntimeConfig.cmake" -Value "set(OnnxRuntime_INCLUDE_DIRS `${CMAKE_CURRENT_LIST_DIR}/include`)"
-    Add-Content -Path "install-static\OnnxRuntimeConfig.cmake" -Value "include_directories(${OnnxRuntime_INCLUDE_DIRS})"
+    Add-Content -Path "install-static\OnnxRuntimeConfig.cmake" -Value "include_directories(`${OnnxRuntime_INCLUDE_DIRS`})"
     Add-Content -Path "install-static\OnnxRuntimeConfig.cmake" -Value "link_directories(`${CMAKE_CURRENT_LIST_DIR}/lib`)"
 
     # 根据 lib exe 是否存在写入不同的 OnnxRuntime_LIBS 值, 如果 lib exe 存在，使用 lib.exe 工具生成 onnxruntime.lib 文件
     if ($LibexeExists)
     {
-        Add-Content -Path "install-static\OnnxRuntimeConfig.cmake" -Value "set(OnnxRuntime_LIBS onnxruntime.lib)"
+        Add-Content -Path "install-static\OnnxRuntimeConfig.cmake" -Value "set(OnnxRuntime_LIBS onnxruntime)"
         lib.exe /OUT:"install-static\lib\onnxruntime.lib" $libs
     }
     else
