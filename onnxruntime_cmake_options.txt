@@ -1,5 +1,9 @@
 --compile-no-warning-as-error 
--Donnxruntime_ENABLE_EXTERNAL_CUSTOM_OP_SCHEMAS=OFF
+-Donnxruntime_USE_DML=OFF
+-Donnxruntime_USE_WINML=OFF
+-Donnxruntime_USE_TELEMETRY=OFF
+-Donnxruntime_ENABLE_PIX_FOR_WEBGPU_EP=OFF
+-Donnxruntime_ENABLE_MEMLEAK_CHECKER=ON
 -Donnxruntime_RUN_ONNX_TESTS=OFF
 -Donnxruntime_GENERATE_TEST_REPORTS=ON
 -Donnxruntime_USE_VCPKG=OFF
@@ -76,6 +80,7 @@
 -Donnxruntime_DISABLE_SPARSE_TENSORS=OFF
 -Donnxruntime_DISABLE_OPTIONAL_TYPE=OFF
 -Donnxruntime_CUDA_MINIMAL=OFF
+-Donnxruntime_USE_KLEIDIAI=ON
 -Donnxruntime_BUILD_UNIT_TESTS=OFF
 -Donnxruntime_CROSS_COMPILING=ON
 -DCMAKE_TLS_VERIFY=ON
