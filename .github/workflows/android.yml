@@ -57,11 +57,11 @@ jobs:
         run: gradle --version
 
       # 检出代码
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # 检出onnxruntime
       - name: checkout onnxruntime
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: microsoft/onnxruntime
           path: onnxruntime-${{ matrix.ver.onnx }}
@@ -93,6 +93,7 @@ jobs:
           7z a ${{ env.JAVA_PKG_NAME }}.7z ${{ matrix.list.arch }}
 
       # 上传artifact
+      # https://github.com/marketplace/actions/upload-a-build-artifact
       - name: upload shared lib
         uses: actions/upload-artifact@v4
         with:
@@ -129,7 +130,8 @@ jobs:
 
     steps:
       # 检出代码
-      - uses: actions/checkout@v4
+      # https://github.com/marketplace/actions/checkout
+      - uses: actions/checkout@v5
 
       # 获取所有的git log和tag
 #      - name: Unshallow
@@ -153,8 +155,9 @@ jobs:
 #          echo -e '${{ env.log_state }}' > release.md
 
       # 下载artifact
+      # https://github.com/marketplace/actions/download-a-build-artifact
       - name: download
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: artifacts
 

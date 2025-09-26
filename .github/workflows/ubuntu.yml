@@ -38,11 +38,12 @@ jobs:
 
     steps:
       # 检出代码
-      - uses: actions/checkout@v4
+      # https://github.com/marketplace/actions/checkout
+      - uses: actions/checkout@v5
 
       # 检出onnxruntime
       - name: checkout onnxruntime
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: microsoft/onnxruntime
           path: onnxruntime-${{ matrix.ver.onnx }}
