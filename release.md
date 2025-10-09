@@ -1,10 +1,12 @@
 ## 编译环境
 
 ### Android
+* NDK 版本 r28 及更高版本默认编译为 16 KB 对齐
+* https://developer.android.com/guide/practices/page-sizes?hl=zh-cn#ndk-build
 
 | 操作系统         | ndk           | JDK | gradle |
 |--------------|---------------|-----|--------|
-| ubuntu 22.04 | 26.1.10909125 | 17  | 8.6    |
+| ubuntu 22.04 | 28.0.13004108 | 17  | 8.6    |
 
 ### Windows
 
